@@ -3,6 +3,7 @@ export let saveItems=async (req,res) => {
    try {
     let {title,url,tags,type,notes}=req.body;
     let item=await itemsModel.create({
+        userId:req.user.id,
         title,
         url,
         tags,
@@ -13,7 +14,9 @@ export let saveItems=async (req,res) => {
         message:"An is item is added",
         item:item
     })
-   } catch (error) {
+   } catch (error) {    
+    console.log(error);
+    
     return res.status(500).json({
         message:"Internal server error"
     })
@@ -21,12 +24,15 @@ export let saveItems=async (req,res) => {
 }
 export let getItems=async (req,res) => {
     try {
-        let allItems=await itemsModel.find()
+        let allItems=await itemsModel.find({
+            userId:req.user.id
+        })
     if(!allItems){
         return res.status(404).json({
             message:"Items not found"
         })
     }
+
     return res.status(200).json({
         message:"All items",
         items:allItems
@@ -40,12 +46,17 @@ export let getItems=async (req,res) => {
 export let getOneItem=async (req,res) => {
     try {
         let pr=req.params.id
-        let item=await itemsModel.findById(pr)
+        let item=await itemsModel.find({
+            userId:req.user.id,
+            _id:pr
+        })
         if(!item){
             return res.status(404).json({
                 message:"Item not found"
             })
         }
+
+
         return res.status(200).json({
             message:"Your requested item founded successfully",
             item:item

@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
 let itemsSchema=new mongoose.Schema({
+    userId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"user",
+        required:true
+    }
+    ,
     title:{
         type:String,
         required:[true,"Title is required"],
@@ -9,7 +15,6 @@ let itemsSchema=new mongoose.Schema({
         type:String,
         required:[true,"Url is required"],
         trim:true,
-        unique:true
     },
     tags:{
         type:[String],
