@@ -1,0 +1,60 @@
+import itemsModel from "../models/items.model.js";
+export let saveItems=async (req,res) => {
+   try {
+    let {title,url,tags,type,notes}=req.body;
+    let item=await itemsModel.create({
+        title,
+        url,
+        tags,
+        type,
+        notes
+    })
+    return res.status(201).json({
+        message:"An is item is added",
+        item:item
+    })
+   } catch (error) {
+    return res.status(500).json({
+        message:"Internal server error"
+    })
+   }
+}
+export let getItems=async (req,res) => {
+    try {
+        let allItems=await itemsModel.find()
+    if(!allItems){
+        return res.status(404).json({
+            message:"Items not found"
+        })
+    }
+    return res.status(200).json({
+        message:"All items",
+        items:allItems
+    })
+    } catch (error) {
+        return res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
+export let getOneItem=async (req,res) => {
+    try {
+        let pr=req.params.id
+        let item=await itemsModel.findById(pr)
+        if(!item){
+            return res.status(404).json({
+                message:"Item not found"
+            })
+        }
+        return res.status(200).json({
+            message:"Your requested item founded successfully",
+            item:item
+        })
+    } catch (error) {
+        console.log(error);
+        
+        return res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
