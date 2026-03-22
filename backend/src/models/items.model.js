@@ -4,6 +4,10 @@ let itemsSchema=new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"user",
         required:true
+    },
+    collectionName:{
+        type:String,
+        default:null
     }
     ,
     title:{
@@ -23,7 +27,7 @@ let itemsSchema=new mongoose.Schema({
     type:{
         type:String,
         required:[true,"Type is required"],
-        enum:["article","video","tweet","image","pdf"]
+        enum:["Article","Video","Tweet","Image","Pdf"]
     },
     notes:{
         type:String,

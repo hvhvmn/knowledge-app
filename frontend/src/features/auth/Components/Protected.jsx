@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import { Navigate } from 'react-router'
+import { Navigate, Outlet } from 'react-router'
 import LoadingAnimation from './LoadingAnimation'
 const Protected = ({children}) => {
     let user=useSelector(state=>state.auth.user)
@@ -12,7 +12,7 @@ const Protected = ({children}) => {
         return <Navigate to="/login" replace/>
     }
   return (
-   children
+   <Outlet/>
 )
 }
 

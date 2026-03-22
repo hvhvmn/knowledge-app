@@ -1,9 +1,11 @@
+import { collectionModel } from "../models/collection.models.js";
 import itemsModel from "../models/items.model.js";
 export let saveItems=async (req,res) => {
    try {
-    let {title,url,tags,type,notes}=req.body;
+    let {title,url,tags,type,notes,collectionName}=req.body;
     let item=await itemsModel.create({
         userId:req.user.id,
+        collectionName,
         title,
         url,
         tags,
@@ -64,6 +66,34 @@ export let getOneItem=async (req,res) => {
     } catch (error) {
         console.log(error);
         
+        return res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
+export let addItemInCollection=async (req,res) => {
+    try {
+        let {collectionName}=req.body;
+        let itemId=req.params.id;
+        let isCollection=await collectionModel.findOne({
+            collectionName
+        })
+        if(!isCollection){
+            return res.status(404).json({
+                message:"Collection not found"
+            })
+        }
+        let collection=await itemsModel.findOneAndUpdate({
+          userId:req.user.id,
+          _id:itemId
+        },{
+              collectionName:collectionName
+        })
+        return res.status(200).json({
+            message:"Item is added to the collection",
+            collection
+        })
+    } catch (error) {
         return res.status(500).json({
             message:"Internal server error"
         })

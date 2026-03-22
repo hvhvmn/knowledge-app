@@ -7,6 +7,7 @@ import {
 import { useItems } from '../hooks/useItems';
 import { useSelector } from 'react-redux';
 import ItemsCard from '../components/ItemsCard';
+import { Link } from 'react-router';
 
 const Dashboard = () => {
   let items=useItems()
@@ -38,7 +39,7 @@ let user=useSelector(state=>state.auth.user)
         </nav>
 
         <button className="w-full bg-gradient-to-r from-[#7C3AED] to-[#A855F7] hover:opacity-90 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition shadow-lg shadow-purple-500/20">
-          <Plus size={18} /> New Insight
+          <Plus size={18} /> <Link to="/add">Add Item</Link>
         </button>
       </aside>
 

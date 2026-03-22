@@ -4,7 +4,7 @@ let api=axios.create({
     withCredentials:true
 })
 export let saveAItem=async ({title,url,tags,type,notes}) => {
-    let res=await api.post("/save",{title,url,notes,tags,typs})
+    let res=await api.post("/save",{title,url,notes,tags,type})
     return res.data
 }
 export let getAllItems=async () => {

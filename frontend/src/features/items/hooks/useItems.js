@@ -9,7 +9,9 @@ export let useItems=()=>{
         let data=await saveAItem({title,url,tags,type,notes})
         dispatch(setItem(data.item))
         } catch (error) {
-            throw new Error("Error in saving an items");
+            // throw new Error("Error in saving an items");
+            
+            console.log(error);
             
         }
         finally{

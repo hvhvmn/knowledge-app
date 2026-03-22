@@ -10,7 +10,7 @@ export let validateItems = [
     body('title').notEmpty().withMessage('Title is required'),
     body('url').notEmpty().withMessage('Url is required'),
     body('tags').optional().isArray().withMessage('Tags must be an array of strings'),
-    body('type').notEmpty().withMessage('Type is required').isIn(['article','video','tweet','image','pdf']),
+    body('type').notEmpty().withMessage('Type is required').isIn(['Article','Video','Tweet','Image','Pdf']),
     body('notes').optional().isString().withMessage('Notes must be a string'),
     valid
 ]
