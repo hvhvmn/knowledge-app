@@ -32,8 +32,8 @@ const Form = () => {
       <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-purple-900/10 rounded-full blur-[160px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[160px] pointer-events-none" />
       
-      {/* Navbar (Static Header) */}
-      <nav className="absolute top-0 left-0 right-0 flex justify-between items-center p-6 border-b border-white/5 z-20">
+      {/* Navbar (Static Header)
+      <nav className="absolute top-0 left-0 right-0 flex justify-between items-center p-6  z-20">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-md bg-[#23232C] border border-white/5 flex items-center justify-center shadow-inner">
             <Sparkles size={16} className="text-purple-400" />
@@ -50,18 +50,18 @@ const Form = () => {
              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" />
           </div>
         </div>
-      </nav>
+      </nav> */}
 
       {/* --- Main Modal Card --- */}
-      <div className="w-full max-w-2xl bg-[#0D0D14]/80 backdrop-blur-xl rounded-[32px] p-12 border border-white/5 shadow-2xl z-10 relative group">
+      <div className="w-fit bg-[#0D0D14]/80 backdrop-blur-xl  rounded-[32px] p-6 border border-white/5 shadow-2xl z-10 relative group">
         
-        {/* Top Badge */}
-        <div className="flex justify-center mb-8">
+        {/* Top Badge
+        <div className="flex justify-center mb-[-20px]">
           <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#1A1A26] border border-white/5 shadow-inner">
             <Sparkles size={12} className="text-purple-400" />
             <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500">New Collection</span>
           </div>
-        </div>
+        </div> */}
 
         {/* Title and Subtitle */}
         <div className="text-center mb-16">
@@ -86,17 +86,7 @@ const Form = () => {
             />
           </div>
 
-          {/* Description */}
-          <div>
-            <label className="block text-[10px] uppercase tracking-[0.3em] font-bold text-gray-500 mb-3 ml-1">
-              Description
-            </label>
-            <textarea 
-              rows="4"
-              placeholder="Describe what this collection is about..." 
-              className="w-full bg-[#030303] border border-white/5 rounded-xl px-5 py-4 text-sm focus:outline-none focus:border-purple-500/40 transition text-gray-400 resize-none placeholder:text-gray-700"
-            />
-          </div>
+          
 
           {/* Color and Icon Selectors Row */}
           <div className="grid grid-cols-2 gap-12">
@@ -152,11 +142,11 @@ const Form = () => {
       </div>
 
       {/* Large Blurred Footer Text */}
-      <div className="absolute bottom-[-80px] left-1/2 -translate-x-1/2 select-none z-0 pointer-events-none">
+      {/* <div className="absolute bottom-[-80px] left-1/2 -translate-x-1/2 select-none z-0 pointer-events-none">
         <h2 className="text-[260px] font-black uppercase tracking-[0.1em] text-white opacity-[0.03] blur-sm">
           ETHEREAL
         </h2>
-      </div>
+      </div> */}
     </div>
   );
 };

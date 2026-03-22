@@ -9,7 +9,7 @@ export let createCollection=async (req,res) => {
                 message:"All fields are required"
             })
         }
-     let collection=collectionModel.create({
+     let collection= await collectionModel.create({
         collectionName,
         userId:req.user.id
      })  
