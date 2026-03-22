@@ -1,29 +1,29 @@
 import React, { useEffect } from 'react';
-import { 
-  LayoutDashboard, Compass, Bookmark, Folder, Settings, 
-  Plus, Search, Bell, HelpCircle, MoreHorizontal, Share2, 
+import {
+  LayoutDashboard, Compass, Bookmark, Folder, Settings,
+  Plus, Search, Bell, HelpCircle, MoreHorizontal, Share2,
   Play, FileText, Image as ImageIcon, MessageSquare, Trash2
 } from 'lucide-react';
 import { useItems } from '../hooks/useItems';
 import { useSelector } from 'react-redux';
 import ItemsCard from '../components/ItemsCard';
 import { Link } from 'react-router';
-
+import { NavLink } from "react-router-dom";
 const Dashboard = () => {
-  let items=useItems()
-  useEffect(()=>{
+  let items = useItems()
+  useEffect(() => {
     items.handleGetAllItems()
-  },[])
-  let allItems=useSelector(state=>state.items.item)
-  let loading=useSelector(state=>state.items.isLoading)
-let user=useSelector(state=>state.auth.user)  
+  }, [])
+  let allItems = useSelector(state => state.items.item)
+  let loading = useSelector(state => state.items.isLoading)
+  let user = useSelector(state => state.auth.user)
   return (
     <div className="flex min-h-screen bg-[#090A11] text-gray-400 font-sans">
-      
+
       {/* --- SIDEBAR --- */}
       <aside className="w-64 bg-[#0F111A] border-r border-white/5 flex flex-col p-6 space-y-8">
         <div className="flex items-center gap-3 px-2">
-          
+
           <div>
             <h1 className="text-white font-bold text-md leading-none">Ethereal AI</h1>
             <p className="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Knowledge Manager</p>
@@ -31,11 +31,12 @@ let user=useSelector(state=>state.auth.user)
         </div>
 
         <nav className="flex-grow space-y-2">
-          <NavItem icon={<LayoutDashboard size={18}/>} label="Dashboard" active />
-          <NavItem icon={<Compass size={18}/>} label="Explore" />
-          <NavItem icon={<Bookmark size={18}/>} label="Saved Items" />
-          <NavItem icon={<Folder size={18}/>} label="Collections" />
+          <NavItem to="/" icon={<LayoutDashboard size={18} />} label="Dashboard" />
+          <NavItem to="/explore" icon={<Compass size={18} />} label="Explore" />
+          <NavItem to="/saved" icon={<Bookmark size={18} />} label="Saved Items" />
+          <NavItem to="/collections" icon={<Folder size={18} />} label="Collections" />
           <button className='bg-red-500 p-2 border-none rounded-xl ml-1 hover:bg-red-700 active:scale-95 text-white'>Log Out</button>
+
         </nav>
 
         <button className="w-full bg-gradient-to-r from-[#7C3AED] to-[#A855F7] hover:opacity-90 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition shadow-lg shadow-purple-500/20">
@@ -45,10 +46,10 @@ let user=useSelector(state=>state.auth.user)
 
       {/* --- MAIN CONTENT --- */}
       <main className="flex-1 p-8 overflow-y-auto">
-        
+
         {/* Header */}
         <header className="flex justify-end items-center mb-10">
-          
+
           <div className="flex items-center gap-5">
             <button className="relative text-gray-400 hover:text-white transition">
               <Bell size={20} />
@@ -72,7 +73,7 @@ let user=useSelector(state=>state.auth.user)
         {/* Filters */}
         <div className="flex flex-col gap-6 mb-8">
           <div className="flex gap-4 bg-[#161926]/50 p-1 rounded-xl w-fit border border-white/5">
-            {['All', 'Articles', 'Videos', 'Tweets', 'Images','Pdf'].map((tab, i) => (
+            {['All', 'Articles', 'Videos', 'Tweets', 'Images', 'Pdf'].map((tab, i) => (
               <button key={tab} className={`px-6 py-2 rounded-lg text-sm font-medium transition ${i === 0 ? 'bg-[#1F2335] text-white shadow-sm' : 'hover:text-white'}`}>
                 {tab}
               </button>
@@ -89,24 +90,32 @@ let user=useSelector(state=>state.auth.user)
 
         {/* Grid Layout */}
         <div className="flex gap-6">
-  {allItems && allItems.length > 0 ? (
-    allItems.map((elem) => (
-      <ItemsCard key={elem._id} elem={elem} />
-    ))
-  ) : (
-    <div className="text-gray-500">No items added</div>
-  )}
-</div>
+          {allItems && allItems.length > 0 ? (
+            allItems.map((elem) => (
+              <ItemsCard key={elem._id} elem={elem} />
+            ))
+          ) : (
+            <div className="text-gray-500">No items added</div>
+          )}
+        </div>
       </main>
     </div>
   );
 };
 
-const NavItem = ({ icon, label, active = false }) => (
-  <div className={`flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition ${active ? 'bg-gradient-to-r from-purple-500/20 to-transparent text-purple-400 border-l-2 border-purple-500' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}>
+const NavItem = ({ icon, label, to }) => (
+  <NavLink
+    to={to}
+    className={({ isActive }) =>
+      `flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition ${isActive
+        ? "bg-gradient-to-r from-purple-500/20 to-transparent text-purple-400 border-l-2 border-purple-500"
+        : "text-gray-500 hover:text-white hover:bg-white/5"
+      }`
+    }
+  >
     {icon}
     <span className="text-sm font-medium">{label}</span>
-  </div>
+  </NavLink>
 );
 
 

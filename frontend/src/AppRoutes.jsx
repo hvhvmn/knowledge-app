@@ -4,6 +4,8 @@ import Login from "./features/auth/pages/Login"
 import Dashboard from "./features/items/pages/Dashboard"
 import Protected from "./features/auth/Components/Protected"
 import AddItems from "./features/items/components/AddItems"
+import Collection from "./features/collections/pages/Collection"
+import Form from "./features/collections/components/Form"
 export let routes=createBrowserRouter([
     {
         path:"/register",
@@ -24,6 +26,14 @@ export let routes=createBrowserRouter([
             {
                 path:"add",
                 element:<AddItems/>
+            },
+            {
+                path:"collections",
+                element:<Collection/>
+            },
+            {
+                path:"create-collection",
+                element:<Form/>
             }
         ] 
     }
