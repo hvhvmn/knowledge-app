@@ -2,10 +2,9 @@ import { collectionModel } from "../models/collection.models.js";
 import itemsModel from "../models/items.model.js";
 export let saveItems=async (req,res) => {
    try {
-    let {title,url,tags,type,notes,collectionName}=req.body;
+    let {title,url,tags,type,notes}=req.body;
     let item=await itemsModel.create({
         userId:req.user.id,
-        collectionName,
         title,
         url,
         tags,
@@ -73,10 +72,10 @@ export let getOneItem=async (req,res) => {
 }
 export let addItemInCollection=async (req,res) => {
     try {
-        let {collectionName}=req.body;
-        let itemId=req.params.id;
+        let {id}=req.params;
+        let {iId}=req.params
         let isCollection=await collectionModel.findOne({
-            collectionName
+            _id:id
         })
         if(!isCollection){
             return res.status(404).json({
@@ -85,13 +84,35 @@ export let addItemInCollection=async (req,res) => {
         }
         let collection=await itemsModel.findOneAndUpdate({
           userId:req.user.id,
-          _id:itemId
+          _id:iId
         },{
-              collectionName:collectionName
+              collectionId:id
         })
         return res.status(200).json({
             message:"Item is added to the collection",
             collection
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
+export let deleteAnItem=async (req,res) => {
+    try {
+        let {id}=req.params
+        let isItem=await itemsModel.findOne({
+            userId:req.user.id,
+            _id:id
+        })
+        if(!isItem){
+            return res.status(404).json({
+                message:"Item not found"
+            })
+        }
+        await itemsModel.findByIdAndDelete(id)
+        return res.status(200).json({
+            message:"Item deleted"
         })
     } catch (error) {
         return res.status(500).json({

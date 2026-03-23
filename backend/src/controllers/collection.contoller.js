@@ -9,6 +9,12 @@ export let createCollection=async (req,res) => {
                 message:"All fields are required"
             })
         }
+       let isCollection=await collectionModel.findOne({collectionName})
+       if(isCollection){
+        return res.status(409).json({
+            message:"Collection with this collection name is already there"
+        })
+       } 
      let collection= await collectionModel.create({
         collectionName,
         userId:req.user.id
@@ -63,6 +69,30 @@ export let openCollection=async (req,res) => {
             items:open
         })
     } catch (error) {        
+        return res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
+export let deleteCollection=async (req,res) => {
+    try {
+        let {id}=req.params
+        let isCollection=await collectionModel.findOne({
+            _id:id,
+            userId:req.user.id
+        })
+        if(!isCollection){
+            return res.status(404).json({
+                message:"Collection not found"
+            })
+        }
+        await collectionModel.findByIdAndDelete(id)
+        await itemsModel.deleteMany({collectionId:id})
+        return res.status(200).json({
+            message:"Collection deleted"
+        })
+    } catch (error) {
+        console.log(error);
         return res.status(500).json({
             message:"Internal server error"
         })

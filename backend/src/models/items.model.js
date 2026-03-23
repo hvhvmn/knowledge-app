@@ -5,11 +5,11 @@ let itemsSchema=new mongoose.Schema({
         ref:"user",
         required:true
     },
-    collectionName:{
-        type:String,
+    collectionId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"collection",
         default:null
-    }
-    ,
+    },
     title:{
         type:String,
         required:[true,"Title is required"],

@@ -3,20 +3,20 @@ import {
     Brain, Box, Lightbulb, Palette, Banknote,
     Sparkles, X, ChevronRight, FileText, Play, Image as ImageIcon
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
+import { useCollections } from '../hooks/useCollection';
+import { useSelector } from 'react-redux';
+import CollectionCard from '../components/CollectionCard';
 const Collection = () => {
     let [flag, setFlag] = useState(true)
-    const collections = [
-        { id: 1, title: 'AI Research', desc: 'Market research and papers on LLM architectures.', items: 12, icon: <Brain />, color: 'purple' },
-        { id: 2, title: 'React Components', desc: 'Reusable UI blocks for future projects.', items: 45, icon: <Box />, color: 'blue' },
-        { id: 3, title: 'Startup Ideas', desc: 'Early stage concepts and market gaps.', items: 8, icon: <Lightbulb />, color: 'yellow' },
-        { id: 4, title: 'Design Inspo', desc: 'Visual references and editorial layouts.', items: 29, icon: <Palette />, color: 'pink' },
-        { id: 5, title: 'Finance & Crypto', desc: 'Portfolio tracking and whitepapers.', items: 15, icon: <Banknote />, color: 'indigo' },
-    ];
-    let dismisHandler = () => {
-        setFlag(false)
-    }
+    let collection=useCollections()
+    useEffect(()=>{
+      collection.handleGetAllCollection()
+    },[])
+    let collections=useSelector(state=>state.collection.collection)
+    console.log(collections);
+    let handleDelete=collection.handleDeleteCollection
     return (
         <div className="min-h-screen bg-[#05070A] text-gray-400 font-sans p-8">
 
@@ -60,7 +60,7 @@ const Collection = () => {
 
             {/* --- COLLECTIONS GRID --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                {collections.map((col) => (
+                {/* {collections.map((col) => (
                     <div key={col.id} className="bg-[#0D1117]/50 border border-white/5 rounded-[32px] p-8 hover:bg-[#161B22]/50 transition-all group cursor-pointer hover:border-white/10">
                         <div className="w-12 h-12 rounded-2xl bg-[#161B22] flex items-center justify-center text-purple-400 mb-8 border border-white/5 group-hover:scale-110 transition-transform">
                             {col.icon}
@@ -77,7 +77,10 @@ const Collection = () => {
                             <span className="text-[10px] uppercase tracking-widest font-bold text-gray-600">{col.items} Items</span>
                         </div>
                     </div>
-                ))}
+                ))} */}
+                {collections?collections.map((elem,idx)=>{
+                    return <CollectionCard handleDelete={handleDelete} elem={elem} key={idx}/>
+                }):"No collection created"}
 
                 {/* Empty State / Add New */}
                 <div className="border-2 border-dashed border-white/5 rounded-[32px] flex flex-col items-center justify-center p-8 hover:border-white/10 transition-colors cursor-pointer group min-h-[280px]">

@@ -1,29 +1,17 @@
 import React, { useState } from 'react';
 import { Sparkles, Folder, Brain, Zap, Wand2, Bell, Search } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { useCollections } from '../hooks/useCollection';
 
 const Form = () => {
-  const [selectedColor, setSelectedColor] = useState('purple');
-  const [selectedIcon, setSelectedIcon] = useState('folder');
-
-  const colorOptions = [
-    { id: 'purple', bg: 'bg-[#B48FFF]' },
-    { id: 'blue', bg: 'bg-[#5B7BFE]' },
-    { id: 'green', bg: 'bg-[#10B981]' },
-    { id: 'yellow', bg: 'bg-[#F59E0B]' },
-    { id: 'red', bg: 'bg-[#EF4444]' },
-  ];
-
-  const iconOptions = [
-    { id: 'folder', icon: Folder },
-    { id: 'brain', icon: Brain },
-    { id: 'zap', icon: Zap },
-    { id: 'wand', icon: Wand2 },
-  ];
-
-  const handleSubmit = (e) => {
+  
+  let collection=useCollections()
+  let navigate=useNavigate()
+let [collectionName,setCollectionName]=useState('')
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log("Creating collection...");
+   await collection.handleCreateCollection({collectionName})
+     navigate("/collections")
   };
 
   return (
@@ -80,7 +68,9 @@ const Form = () => {
             </label>
             <input 
               required
-              type="text" 
+              type="text"
+              value={collectionName}
+              onChange={(e)=>setCollectionName(e.target.value)} 
               placeholder="e.g. AI, Web Development, Startup Ideas" 
               className="w-full bg-[#030303] border border-white/5 rounded-xl px-5 py-4 text-sm focus:outline-none focus:border-purple-500/40 transition placeholder:text-gray-700"
             />
@@ -88,45 +78,6 @@ const Form = () => {
 
           
 
-          {/* Color and Icon Selectors Row */}
-          <div className="grid grid-cols-2 gap-12">
-            <div>
-              <label className="block text-[10px] uppercase tracking-[0.3em] font-bold text-gray-500 mb-3 ml-1">
-                Color Theme
-              </label>
-              <div className="flex items-center gap-4 pt-1">
-                {colorOptions.map(color => (
-                  <button 
-                    key={color.id}
-                    type="button"
-                    onClick={() => setSelectedColor(color.id)}
-                    className={`${color.bg} w-7 h-7 rounded-full border-4 transition-all duration-300 ${selectedColor === color.id ? 'border-white scale-110 shadow-lg' : 'border-transparent hover:border-white/20'}`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-[10px] uppercase tracking-[0.3em] font-bold text-gray-500 mb-3 ml-1">
-                Select Icon
-              </label>
-              <div className="flex items-center gap-4">
-                {iconOptions.map(option => {
-                  const IconComponent = option.icon;
-                  return (
-                    <button 
-                      key={option.id}
-                      type="button"
-                      onClick={() => setSelectedIcon(option.id)}
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition border-2 ${selectedIcon === option.id ? 'bg-[#23232C] border-purple-500 shadow-xl' : 'bg-[#1A1A26] border-white/5 hover:border-purple-500/30'}`}
-                    >
-                      <IconComponent size={18} className={selectedIcon === option.id ? 'text-purple-400' : 'text-gray-600'} />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
 
           {/* Form Actions */}
           <div className="flex justify-end items-center gap-6 pt-10 border-t border-white/5">

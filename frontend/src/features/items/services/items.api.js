@@ -15,3 +15,7 @@ export let getOneItem=async (id) => {
     let res=await api.get(`/get-one/${id}`)
     return res.data
 }
+export let deleteItem=async (id) => {
+    let res=await api.delete(`/delete/item/${id}`)
+    return res.data
+}

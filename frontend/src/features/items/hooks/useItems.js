@@ -1,6 +1,6 @@
 import {useDispatch } from 'react-redux'
 import { setIsLoading, setItem } from '../items.slice'
-import { getAllItems, getOneItem, saveAItem } from '../services/items.api'
+import { deleteItem, getAllItems, getOneItem, saveAItem } from '../services/items.api'
 export let useItems=()=>{
     let dispatch=useDispatch()
     let handleSaveAItem=async ({title,url,tags,type,notes}) => {
@@ -44,5 +44,18 @@ export let useItems=()=>{
             dispatch(setIsLoading(false))
         }
     }
-    return {handleSaveAItem,handleGetAllItems,handleGetOneItem}
+    let handleDeleteItem=async (id) => {
+        try {
+            dispatch(setIsLoading(true))
+        await deleteItem(id)
+        handleGetAllItems()
+        } catch (error) {
+            throw new Error("Error in deleting an item");
+            
+        }
+        finally{
+            dispatch(setIsLoading(false))
+        }
+    }
+    return {handleSaveAItem,handleGetAllItems,handleGetOneItem,handleDeleteItem}
 }

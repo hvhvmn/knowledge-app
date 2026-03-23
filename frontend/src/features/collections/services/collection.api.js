@@ -15,3 +15,7 @@ export let openACollection=async ({collectionName}) => {
     let res=await api.get("/open/collection",{collectionName})
     return res.data
 }
+export let deleteACollection=async (id) => {
+    let res=await api.delete(`/delete/collection/${id}`)
+    return res.data
+}

@@ -9,9 +9,11 @@ import {
   MessageSquare, 
   Link as LinkIcon 
 } from 'lucide-react';
+import { useItems } from '../hooks/useItems';
 
 const ItemsCard = ({ elem }) => {
   // Function to render the correct icon based on content type
+
   const renderTypeIcon = (type) => {
     const iconSize = 16;
     switch (type?.toLowerCase()) {
@@ -22,7 +24,7 @@ const ItemsCard = ({ elem }) => {
       default: return <LinkIcon size={iconSize} />;
     }
   };
-
+  let items=useItems()
   return (
     <div className="bg-[#0F111A] rounded-[24px] p-6 border border-white/5 hover:border-white/10 w-fit transition group flex flex-col gap-3 justify-between h-full hover:shadow-2xl hover:shadow-purple-500/5">
       <div>
@@ -33,7 +35,11 @@ const ItemsCard = ({ elem }) => {
           </div>
           <div className="flex gap-2 text-gray-600 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
             <Bookmark size={18} className="hover:text-white cursor-pointer transition" />
-            <Trash2 size={18} className="hover:text-red-400 cursor-pointer transition" />
+            <Trash2 
+            onClick={()=>{
+              items.handleDeleteItem(elem._id)
+            }}
+            size={18} className="hover:text-red-400 cursor-pointer transition" />
           </div>
         </div>
 
