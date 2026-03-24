@@ -6,6 +6,7 @@ import Protected from "./features/auth/Components/Protected"
 import AddItems from "./features/items/components/AddItems"
 import Collection from "./features/collections/pages/Collection"
 import Form from "./features/collections/components/Form"
+import CollectionItems from "./features/collections/pages/CollectionItems"
 export let routes=createBrowserRouter([
     {
         path:"/register",
@@ -30,6 +31,10 @@ export let routes=createBrowserRouter([
             {
                 path:"collections",
                 element:<Collection/>
+            },
+            {
+                path:"collections/:collectionId",
+                element:<CollectionItems/>
             },
             {
                 path:"create-collection",

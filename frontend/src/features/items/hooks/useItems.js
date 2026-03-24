@@ -1,6 +1,6 @@
-import {useDispatch } from 'react-redux'
+import {useDispatch, useSelector } from 'react-redux'
 import { setIsLoading, setItem } from '../items.slice'
-import { deleteItem, getAllItems, getOneItem, saveAItem } from '../services/items.api'
+import { deleteItem, getAllItems, getOneItem, saveAItem, updateItem, getItemsByCollection } from '../services/items.api'
 export let useItems=()=>{
     let dispatch=useDispatch()
     let handleSaveAItem=async ({title,url,tags,type,notes}) => {
@@ -8,6 +8,8 @@ export let useItems=()=>{
             dispatch(setIsLoading(true))
         let data=await saveAItem({title,url,tags,type,notes})
         dispatch(setItem(data.item))
+           return data.item 
+
         } catch (error) {
             // throw new Error("Error in saving an items");
             
@@ -57,5 +59,32 @@ export let useItems=()=>{
             dispatch(setIsLoading(false))
         }
     }
-    return {handleSaveAItem,handleGetAllItems,handleGetOneItem,handleDeleteItem}
+    let handleUpdateItem=async ({iId,id}) => {
+        try {
+            dispatch(setIsLoading(true))
+        await updateItem({iId,id})
+        handleGetAllItems()
+        } catch (error) {
+            throw new Error("Error in updating an item");
+            
+        }
+        finally{
+            dispatch(setIsLoading(false))
+        }
+    }
+    let handleGetItemsByCollection=async (collectionId) => {
+        try {
+            dispatch(setIsLoading(true))
+        let data=await getItemsByCollection(collectionId)
+        dispatch(setItem(data.items))
+        } catch (error) {
+            console.log("Error in getting items by collection", error);
+            
+        }
+        finally{
+            dispatch(setIsLoading(false))
+        }
+    }
+    let item = useSelector(state => state.items.item)
+    return {handleSaveAItem,handleGetAllItems,handleGetOneItem,handleDeleteItem,handleUpdateItem,handleGetItemsByCollection,item}
 }

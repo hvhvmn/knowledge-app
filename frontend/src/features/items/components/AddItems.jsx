@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Globe, X, ChevronDown, Lightbulb, Loader2, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
+import { useSelector } from 'react-redux';
 import { useItems } from '../hooks/useItems';
-
+import { useCollections } from '../../collections/hooks/useCollection'
 const AddItems = () => {
     let [title, setTitle] = useState('')
     let [url, setUrl] = useState("")
@@ -12,6 +13,15 @@ const AddItems = () => {
     let [tagInput, setTagInput] = useState("")
     let items = useItems()
     let navigate = useNavigate()
+    const [collectionId, setCollectionId] = useState("")
+    let collection = useCollections()
+    
+    // Get collections from Redux state instead of local state
+    const collections = useSelector(state => state.collection.collection) || []
+
+    useEffect(() => {
+        collection.handleGetAllCollection()
+    }, [])
     const addTag = (e) => {
         if (e.key === "Enter" && tagInput.trim() !== "") {
             e.preventDefault()
@@ -25,14 +35,24 @@ const AddItems = () => {
     }
     let handleSubmit = async (e) => {
         e.preventDefault()
-        let payload = {
-            title, url, type, tags, notes
-        }
         if (!type) {
             alert("Please select a type")
             return
-          }
-        await items.handleSaveAItem(payload)
+        }
+        let savePayload = {
+            title,
+            url,
+            type,
+            tags,
+            notes
+        }
+        const savedItem = await items.handleSaveAItem(savePayload)
+        if (savedItem?._id && collectionId) {
+           await items.handleUpdateItem({
+   iId:savedItem._id,
+   id:collectionId
+})
+        }
         navigate("/")
     }
     return (
@@ -102,7 +122,7 @@ const AddItems = () => {
               </div> */}
 
                     {/* Type and Tags Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-500 mb-3 ml-1">Type</label>
                             <div className="relative">
@@ -141,8 +161,52 @@ const AddItems = () => {
                                     placeholder="Type and press Enter..."
                                     className="bg-transparent border-none focus:outline-none text-gray-300 flex-1 min-w-[60px] ml-1 placeholder:text-gray-700"
                                 />
+
                             </div>
+
                         </div>
+                        {/* Collection */}
+                        <div>
+                            <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-500 mb-3 ml-1">
+                                Collection
+                            </label>
+
+                            <div className="flex gap-3">
+
+                                {/* Dropdown */}
+                                <div className="relative flex-1">
+                                    <select
+                                        value={collectionId}
+                                        onChange={(e) => setCollectionId(e.target.value)}
+                                        className="w-full bg-[#05070A] border border-white/5 rounded-xl px-5 py-4 text-sm appearance-none focus:outline-none focus:border-purple-500/40 transition text-gray-200 cursor-pointer"
+                                    >
+
+                                        <option value="">Select Collection</option>
+
+                                        {collections?.map((col) => (
+                                            <option key={col._id} value={col._id}>
+                                                {col.collectionName}
+                                            </option>
+                                        ))}
+
+                                    </select>
+
+                                    <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none" />
+                                </div>
+
+                                {/* Create Collection Button */}
+                                <button
+                                    type="button"
+                                    onClick={() => navigate("/create-collection")}
+                                    className="px-5 py-3 bg-[#0D1117] border border-white/5 rounded-xl text-xs hover:border-purple-500/40 transition"
+                                >
+                                    + New
+                                </button>
+
+                            </div>
+
+                        </div>
+
                     </div>
 
                     {/* Notes */}
@@ -150,8 +214,8 @@ const AddItems = () => {
                         <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-500 mb-3 ml-1">Notes</label>
                         <textarea
                             rows="3"
-                             value={notes}
-                             onChange={(e)=>setNotes(e.target.value)}
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
                             placeholder="Add your thoughts, summary, or key points..."
                             className="w-full bg-[#05070A] border border-white/5 rounded-xl px-5 py-4 text-sm focus:outline-none focus:border-purple-500/40 transition text-gray-400 resize-none"
                         />
@@ -176,6 +240,5 @@ const AddItems = () => {
 
         </div>
     );
-}
-
+}  
 export default AddItems

@@ -44,7 +44,7 @@ const Collection = () => {
             </nav>
 
             {/* --- HEADER --- */}
-            <header className="flex justify-between items-end mb-12">
+            <header className="flex gap-5 items-center   mb-12">
                 <div className="max-w-xl">
                     <h1 className="text-5xl font-bold text-white mb-4 tracking-tight">Your Collections</h1>
                     <p className="text-gray-500 leading-relaxed">
@@ -52,8 +52,13 @@ const Collection = () => {
                     </p>
                 </div>
 
-                <Link
-                    to="/create-collection" className="bg-[#A78BFA] hover:bg-[#C4B5FD] text-[#05070A] px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-purple-500/20">
+                
+                    <Link
+                    to="/add" className="bg-[#A78BFA] hover:bg-[#C4B5FD] text-[#05070A] px-6 py-3 rounded-2xl font-bold flex ml-62 items-center gap-2 transition-all shadow-lg shadow-purple-500/20">
+                    <Plus size={20} />
+                    Create Item</Link>
+                    <Link
+                    to="/create-collection" className="bg-[#A78BFA] hover:bg-[#C4B5FD] text-[#05070A] px-6 py-3 rounded-2xl font-bold flex  items-center gap-2 transition-all shadow-lg shadow-purple-500/20">
                     <Plus size={20} />
                     New Collection</Link>
             </header>

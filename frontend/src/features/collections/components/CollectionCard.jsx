@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import { Folder, Trash2, MoreVertical } from "lucide-react";
 import { useCollections } from '../hooks/useCollection';
+import { useNavigate } from 'react-router';
 const CollectionCard = ({elem,handleDelete}) => {
 let collection=useCollections()
+let navigate=useNavigate()
+
+const handleCardClick=(e)=>{
+  // Don't navigate if clicking on delete or more button
+  if(e.target.closest('button')){
+    return
+  }
+  navigate(`/collections/${elem._id}`)
+}
 
   return (
-    <div className="bg-[#0D1117]/50 border border-white/5 rounded-[28px] p-6 hover:bg-[#161B22]/60 transition-all duration-300 group cursor-pointer hover:border-white/10 hover:shadow-xl hover:shadow-purple-500/10 relative overflow-hidden">
+    <div onClick={handleCardClick} className="bg-[#0D1117]/50 border border-white/5 rounded-[28px] p-6 hover:bg-[#161B22]/60 transition-all duration-300 group cursor-pointer hover:border-white/10 hover:shadow-xl hover:shadow-purple-500/10 relative overflow-hidden">
 
     {/* Glow Effect */}
     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 blur-2xl" />
@@ -24,8 +34,8 @@ let collection=useCollections()
         {/* DELETE BUTTON */}
         <button
           onClick={(e) => {
+            e.stopPropagation();
             handleDelete(elem._id);
-
           }}
           className="text-gray-600 hover:text-red-400 transition"
         >
@@ -33,7 +43,7 @@ let collection=useCollections()
         </button>
   
         {/* More */}
-        <button className="text-gray-600 hover:text-white">
+        <button className="text-gray-600 hover:text-white" onClick={(e)=>e.stopPropagation()}>
           ⋮
         </button>
       </div>

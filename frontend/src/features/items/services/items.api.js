@@ -19,3 +19,11 @@ export let deleteItem=async (id) => {
     let res=await api.delete(`/delete/item/${id}`)
     return res.data
 }
+export let updateItem=async ({iId,id}) => {
+    let res=await api.put(`/update/item/collection/${iId}/${id}`)
+    return res.data
+}
+export let getItemsByCollection=async (collectionId) => {
+    let res=await api.get(`/collection/${collectionId}`)
+    return res.data
+}
