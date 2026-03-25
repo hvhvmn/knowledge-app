@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   LayoutDashboard, Compass, Bookmark, Folder, Settings,
   Plus, Search, Bell, HelpCircle, MoreHorizontal, Share2,
-  Play, FileText, Image as ImageIcon, MessageSquare, Trash2
+  Play, FileText, Image as ImageIcon, MessageSquare, Trash2, X
 } from 'lucide-react';
 import { useItems } from '../hooks/useItems';
 import { useSelector } from 'react-redux';
@@ -11,9 +11,40 @@ import { Link } from 'react-router';
 import { NavLink } from "react-router-dom";
 const Dashboard = () => {
   let items = useItems()
+  let [searchQuery, setSearchQuery] = useState('')
+  let [debounceTimer, setDebounceTimer] = useState(null)
+  
   useEffect(() => {
     items.handleGetAllItems()
   }, [])
+
+  // Handle search with debounce
+  const handleSearchChange = (e) => {
+    const query = e.target.value
+    setSearchQuery(query)
+    
+    // Clear previous timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+    }
+
+    // Set new timer
+    const timer = setTimeout(() => {
+      if (query.trim() !== "") {
+        items.handleSearchItems(query)
+      } else {
+        items.handleGetAllItems() // Show all items if search is cleared
+      }
+    }, 500) // 500ms debounce
+
+    setDebounceTimer(timer)
+  }
+
+  const clearSearch = () => {
+    setSearchQuery('')
+    items.handleGetAllItems()
+  }
+
   let allItems = useSelector(state => state.items.item)
   let loading = useSelector(state => state.items.isLoading)
   let user = useSelector(state => state.auth.user)
@@ -65,10 +96,31 @@ const Dashboard = () => {
 
         {/* Hero Section */}
         <section className="">
-          <h2 className="text-4xl font-bold text-white mt-[-70px] mb-8 tracking-tight">Welcome to Ethereal AI</h2>
-          <p className="text-gray-500 m-3">An intelligent layer over everything you learn and save.</p>
-
+          <h2 className="text-4xl font-bold text-white mt-[-70px] mb-2 tracking-tight">Welcome to Ethereal AI</h2>
+          <p className="text-gray-500 mb-8">An intelligent layer over everything you learn and save.</p>
         </section>
+
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative w-full max-w-xl">
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search items by title, notes, or tags..."
+              className="w-full bg-[#161926] border border-white/5 rounded-xl pl-12 pr-12 py-3 text-sm text-white focus:outline-none focus:border-purple-500/40 transition placeholder:text-gray-600"
+            />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white transition"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* Filters */}
         <div className="flex flex-col gap-6 mb-8">
@@ -89,14 +141,29 @@ const Dashboard = () => {
         </div>
 
         {/* Grid Layout */}
-        <div className="flex gap-6">
-          {allItems && allItems.length > 0 ? (
-            allItems.map((elem) => (
-              <ItemsCard key={elem._id} elem={elem} />
-            ))
-          ) : (
-            <div className="text-gray-500">No items added</div>
+        <div>
+          {searchQuery && (
+            <div className="mb-4 flex items-center gap-2">
+              <span className="text-sm text-gray-400">Search results for:</span>
+              <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-lg text-sm font-medium">
+                "{searchQuery}"
+              </span>
+              {allItems && <span className="text-gray-500 text-sm">({allItems.length} found)</span>}
+            </div>
           )}
+          <div className="flex gap-6 flex-wrap">
+            {loading ? (
+              <div className="text-gray-500">Searching...</div>
+            ) : allItems && allItems.length > 0 ? (
+              allItems.map((elem) => (
+                <ItemsCard key={elem._id} elem={elem} />
+              ))
+            ) : (
+              <div className="text-gray-500">
+                {searchQuery ? "No items found matching your search." : "No items added"}
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </div>

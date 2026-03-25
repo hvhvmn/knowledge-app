@@ -1,16 +1,34 @@
 import { collectionModel } from "../models/collection.models.js";
 import itemsModel from "../models/items.model.js";
+import { generateTags } from "../services/aiService.js";
 export let saveItems=async (req,res) => {
    try {
     let {title,url,tags,type,notes}=req.body;
+    
+    // Generate AI tags based on title and notes
+    const contentForTagging = `${title} ${notes || ''}`;
+    let aiGeneratedTags = [];
+    
+    try {
+        aiGeneratedTags = await generateTags(contentForTagging);
+    } catch (aiError) {
+        console.log("AI tagging failed, continuing without AI tags:", aiError);
+        aiGeneratedTags = [];
+    }
+
+    // Merge user tags with AI-generated tags (avoid duplicates)
+    const userProvidedTags = Array.isArray(tags) ? tags : [];
+    const allTags = [...new Set([...userProvidedTags, ...aiGeneratedTags])]; // Remove duplicates
+
     let item=await itemsModel.create({
         userId:req.user.id,
         title,
         url,
-        tags,
+        tags: allTags,
         type,
         notes
     })
+    
     return res.status(201).json({
         message:"An is item is added",
         item:item
@@ -115,6 +133,63 @@ export let deleteAnItem=async (req,res) => {
             message:"Item deleted"
         })
     } catch (error) {
+        return res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
+export let getItemsByCollection=async (req,res) => {
+    try {
+        let {collectionId}=req.params
+        let items=await itemsModel.find({
+            userId:req.user.id,
+            collectionId:collectionId
+        })
+        if(!items || items.length === 0){
+            return res.status(200).json({
+                message:"No items found in this collection",
+                items:[]
+            })
+        }
+        return res.status(200).json({
+            message:"Items from collection",
+            items:items
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
+export let searchItems=async (req,res) => {
+    try {
+        let {q}=req.query
+        
+        if(!q || q.trim() === ""){
+            return res.status(400).json({
+                message:"Search query is required"
+            })
+        }
+
+        // Create regex for case-insensitive search
+        const searchRegex = new RegExp(q, 'i')
+        
+        let items=await itemsModel.find({
+            userId:req.user.id,
+            $or:[
+                {title: searchRegex},
+                {notes: searchRegex},
+                {tags: searchRegex}
+            ]
+        })
+
+        return res.status(200).json({
+            message:"Search results",
+            items:items
+        })
+    } catch (error) {
+        console.log(error);
         return res.status(500).json({
             message:"Internal server error"
         })

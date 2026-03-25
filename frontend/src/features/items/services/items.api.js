@@ -27,3 +27,7 @@ export let getItemsByCollection=async (collectionId) => {
     let res=await api.get(`/collection/${collectionId}`)
     return res.data
 }
+export let searchItems=async (query) => {
+    let res=await api.get(`/search?q=${query}`)
+    return res.data
+}

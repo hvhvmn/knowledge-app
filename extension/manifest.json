@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Ethereal AI - Save to Knowledge",
+  "version": "1.0",
+  "description": "Save articles, videos, and web pages directly to your Ethereal AI knowledge base",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "cookies"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "https://*/*",
+    "http://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Save to Ethereal AI"
+  }
+}

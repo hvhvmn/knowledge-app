@@ -60,13 +60,16 @@ const ItemsCard = ({ elem }) => {
       <div className="flex justify-between items-center pt-4 border-t border-white/5">
         <div className="flex flex-wrap gap-2">
           {elem.tags && elem.tags.length > 0 ? (
-            elem.tags.map((tag, index) => (
-              <span key={index} className="text-[10px] text-gray-600 font-bold uppercase tracking-wider hover:text-gray-400 cursor-default">
+            elem.tags.slice(0, 3).map((tag, index) => (
+              <span key={index} className="text-[10px] bg-purple-500/10 border border-purple-500/20 text-purple-400 px-2 py-1 rounded-md font-bold uppercase tracking-wider hover:bg-purple-500/20 cursor-default transition">
                 #{tag.replace('#', '')}
               </span>
             ))
           ) : (
             <span className="text-[10px] text-gray-700 font-bold">#UNCATEGORIZED</span>
+          )}
+          {elem.tags && elem.tags.length > 3 && (
+            <span className="text-[10px] text-gray-600 font-bold">+{elem.tags.length - 3}</span>
           )}
         </div>
         <button className="text-gray-600 hover:text-white transition-colors p-1">

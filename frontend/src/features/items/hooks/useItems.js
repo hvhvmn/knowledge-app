@@ -1,6 +1,6 @@
 import {useDispatch, useSelector } from 'react-redux'
 import { setIsLoading, setItem } from '../items.slice'
-import { deleteItem, getAllItems, getOneItem, saveAItem, updateItem, getItemsByCollection } from '../services/items.api'
+import { deleteItem, getAllItems, getOneItem, saveAItem, updateItem, getItemsByCollection, searchItems } from '../services/items.api'
 export let useItems=()=>{
     let dispatch=useDispatch()
     let handleSaveAItem=async ({title,url,tags,type,notes}) => {
@@ -85,6 +85,19 @@ export let useItems=()=>{
             dispatch(setIsLoading(false))
         }
     }
+    let handleSearchItems=async (query) => {
+        try {
+            dispatch(setIsLoading(true))
+        let data=await searchItems(query)
+        dispatch(setItem(data.items))
+        } catch (error) {
+            console.log("Error in searching items", error);
+            
+        }
+        finally{
+            dispatch(setIsLoading(false))
+        }
+    }
     let item = useSelector(state => state.items.item)
-    return {handleSaveAItem,handleGetAllItems,handleGetOneItem,handleDeleteItem,handleUpdateItem,handleGetItemsByCollection,item}
+    return {handleSaveAItem,handleGetAllItems,handleGetOneItem,handleDeleteItem,handleUpdateItem,handleGetItemsByCollection,handleSearchItems,item}
 }
