@@ -52,28 +52,41 @@ const Dashboard = () => {
     <div className="flex min-h-screen bg-[#090A11] text-gray-400 font-sans">
 
       {/* --- SIDEBAR --- */}
-      <aside className="w-64 bg-[#0F111A] border-r border-white/5 flex flex-col p-6 space-y-8">
-        <div className="flex items-center gap-3 px-2">
+      <aside className="w-64 bg-[#0F111A] border-r border-white/5 flex flex-col p-6">
 
-          <div>
-            <h1 className="text-white font-bold text-md leading-none">Ethereal AI</h1>
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Knowledge Manager</p>
-          </div>
-        </div>
+  {/* Top Section */}
+  <div className="space-y-8">
+    <div className="flex items-center gap-3 px-2">
+      <div>
+        <h1 className="text-white font-bold text-md leading-none">
+          Ethereal AI
+        </h1>
+        <p className="text-[10px] uppercase tracking-wider text-gray-500 mt-1">
+          Knowledge Manager
+        </p>
+      </div>
+    </div>
 
-        <nav className="flex-grow space-y-2">
-          <NavItem to="/" icon={<LayoutDashboard size={18} />} label="Dashboard" />
-          <NavItem to="/explore" icon={<Compass size={18} />} label="Explore" />
-          <NavItem to="/saved" icon={<Bookmark size={18} />} label="Saved Items" />
-          <NavItem to="/collections" icon={<Folder size={18} />} label="Collections" />
-          <button className='bg-red-500 p-2 border-none rounded-xl ml-1 hover:bg-red-700 active:scale-95 text-white'>Log Out</button>
+    <nav className="flex-grow space-y-2">
+      <NavItem to="/" icon={<LayoutDashboard size={18} />} label="Dashboard" />      <NavItem to="/graph" icon={<Compass size={18} />} label="Knowledge Graph" />
+      <NavItem to="/collections" icon={<Folder size={18} />} label="Collections" />
 
-        </nav>
+      <button className='bg-red-500 p-2 border-none rounded-xl ml-1 hover:bg-red-700 active:scale-95 text-white'>
+        Log Out
+      </button>
+    </nav>
+  </div>
 
-        <button className="w-full bg-gradient-to-r from-[#7C3AED] to-[#A855F7] hover:opacity-90 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition shadow-lg shadow-purple-500/20">
-          <Plus size={18} /> <Link to="/add">Add Item</Link>
-        </button>
-      </aside>
+
+  {/* Bottom Add Button */}
+  <Link
+    to="/add"
+    className="w-full mt-[240px] bg-gradient-to-r from-[#7C3AED] to-[#A855F7] hover:opacity-90 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition shadow-lg shadow-purple-500/20 no-underline"
+  >
+    <Plus size={18} /> Add Item
+  </Link>
+
+</aside>
 
       {/* --- MAIN CONTENT --- */}
       <main className="flex-1 p-8 overflow-y-auto">
@@ -151,7 +164,7 @@ const Dashboard = () => {
               {allItems && <span className="text-gray-500 text-sm">({allItems.length} found)</span>}
             </div>
           )}
-          <div className="flex gap-6 flex-wrap">
+          <div className="flex gap-6 overflow-x-auto pb-4 hide-scrollbar">
             {loading ? (
               <div className="text-gray-500">Searching...</div>
             ) : allItems && allItems.length > 0 ? (

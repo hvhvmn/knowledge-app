@@ -5,6 +5,7 @@ import itemRouter from "./routes/items.routes.js"
 import morgan from "morgan"
 import cors from "cors"
 import collectionRouter from "./routes/collection.routes.js"
+import graphRouter from "./routes/graph.routes.js"
 let server=express()
 server.use(express.json())
 server.use(cookieParser())
@@ -16,4 +17,5 @@ server.use(cors({
 server.use("/api/auth",authRouter)
 server.use("/api/items",itemRouter)
 server.use("/api/collection",collectionRouter)
+server.use("/api/graph",graphRouter)
 export default server

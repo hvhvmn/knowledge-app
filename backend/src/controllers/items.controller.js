@@ -1,41 +1,48 @@
 import { collectionModel } from "../models/collection.models.js";
 import itemsModel from "../models/items.model.js";
-import { generateTags } from "../services/aiService.js";
+import { generateTags, processItemForAI, embeddingService, vectorSearchService, getRelatedItems } from "../services/aiService.js";
 export let saveItems=async (req,res) => {
    try {
     let {title,url,tags,type,notes}=req.body;
-    
-    // Generate AI tags based on title and notes
-    const contentForTagging = `${title} ${notes || ''}`;
-    let aiGeneratedTags = [];
-    
-    try {
-        aiGeneratedTags = await generateTags(contentForTagging);
-    } catch (aiError) {
-        console.log("AI tagging failed, continuing without AI tags:", aiError);
-        aiGeneratedTags = [];
-    }
 
-    // Merge user tags with AI-generated tags (avoid duplicates)
-    const userProvidedTags = Array.isArray(tags) ? tags : [];
-    const allTags = [...new Set([...userProvidedTags, ...aiGeneratedTags])]; // Remove duplicates
-
+    // First save the item to get the ID
     let item=await itemsModel.create({
         userId:req.user.id,
         title,
         url,
-        tags: allTags,
+        tags: [], // Will be updated after AI processing
         type,
         notes
-    })
-    
+    });
+
+    // Process item with AI (tags + embeddings + vector storage)
+    const aiResult = await processItemForAI(item._id, title, url, tags, notes);
+
+    // Merge user tags with AI-generated tags
+    const userProvidedTags = Array.isArray(tags) ? tags : [];
+    const allTags = [...new Set([...userProvidedTags, ...aiResult.tags])];
+
+    // Update item with final tags
+    item.tags = allTags;
+    await item.save();
+
+    console.log("Item saved with AI processing:", {
+      itemId: item._id,
+      aiTags: aiResult.tags,
+      vectorStored: aiResult.vectorStored
+    });
+
     return res.status(201).json({
-        message:"An is item is added",
-        item:item
+        message:"Item saved successfully with AI processing",
+        item:item,
+        aiProcessing: {
+            tagsGenerated: aiResult.tags.length,
+            vectorStored: aiResult.vectorStored
+        }
     })
-   } catch (error) {    
+   } catch (error) {
     console.log(error);
-    
+
     return res.status(500).json({
         message:"Internal server error"
     })
@@ -165,33 +172,108 @@ export let getItemsByCollection=async (req,res) => {
 export let searchItems=async (req,res) => {
     try {
         let {q}=req.query
-        
+
         if(!q || q.trim() === ""){
             return res.status(400).json({
                 message:"Search query is required"
             })
         }
 
-        // Create regex for case-insensitive search
-        const searchRegex = new RegExp(q, 'i')
-        
-        let items=await itemsModel.find({
-            userId:req.user.id,
-            $or:[
-                {title: searchRegex},
-                {notes: searchRegex},
-                {tags: searchRegex}
-            ]
-        })
+        let items = [];
+
+        // Try vector similarity search first
+        try {
+            const queryEmbedding = await embeddingService(q);
+            if (queryEmbedding) {
+                const vectorResults = await vectorSearchService(queryEmbedding, 20);
+
+                // Get item IDs from vector search results
+                const itemIds = vectorResults.map(result => result.id);
+
+                if (itemIds.length > 0) {
+                    // Fetch full items from database
+                    items = await itemsModel.find({
+                        userId: req.user.id,
+                        _id: { $in: itemIds }
+                    });
+
+                    // Sort items by vector similarity score
+                    const scoreMap = new Map(vectorResults.map(r => [r.id, r.score]));
+                    items.sort((a, b) => (scoreMap.get(b._id.toString()) || 0) - (scoreMap.get(a._id.toString()) || 0));
+
+                    console.log(`Vector search found ${items.length} items for query: "${q}"`);
+                }
+            }
+        } catch (vectorError) {
+            console.log("Vector search failed, falling back to text search:", vectorError);
+        }
+
+        // Fallback to traditional text search if vector search didn't return results
+        if (items.length === 0) {
+            const searchRegex = new RegExp(q, 'i');
+
+            items = await itemsModel.find({
+                userId: req.user.id,
+                $or: [
+                    {title: searchRegex},
+                    {notes: searchRegex},
+                    {tags: searchRegex}
+                ]
+            });
+
+            console.log(`Text search found ${items.length} items for query: "${q}"`);
+        }
 
         return res.status(200).json({
-            message:"Search results",
-            items:items
+            message: "Search results",
+            items: items,
+            searchType: items.length > 0 && items[0]?._id ? "vector" : "text"
         })
     } catch (error) {
         console.log(error);
         return res.status(500).json({
             message:"Internal server error"
         })
+    }
+}
+
+export let getRelatedItemsController = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const limit = parseInt(req.query.limit) || 5;
+
+        // Get related items from vector database
+        const relatedVectors = await getRelatedItems(id, limit);
+
+        if (relatedVectors.length === 0) {
+            return res.status(200).json({
+                message: "No related items found",
+                relatedItems: []
+            });
+        }
+
+        // Get item IDs from vector results
+        const itemIds = relatedVectors.map(result => result.id);
+
+        // Fetch full items from database
+        const relatedItems = await itemsModel.find({
+            userId: req.user.id,
+            _id: { $in: itemIds }
+        });
+
+        // Sort by similarity score
+        const scoreMap = new Map(relatedVectors.map(r => [r.id, r.score]));
+        relatedItems.sort((a, b) => (scoreMap.get(b._id.toString()) || 0) - (scoreMap.get(a._id.toString()) || 0));
+
+        return res.status(200).json({
+            message: "Related items found",
+            relatedItems: relatedItems
+        });
+
+    } catch (error) {
+        console.log("Related items controller error:", error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
     }
 }
