@@ -3,7 +3,7 @@ export let itemsSlice=createSlice({
     name:"items",
     initialState:{
         isLoading:false,
-        item:null,
+        item:[],
     },
     reducers:{
         setIsLoading:(state,action)=>{

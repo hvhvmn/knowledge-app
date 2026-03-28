@@ -7,7 +7,8 @@ import {
   FileText, 
   Image as ImageIcon, 
   MessageSquare, 
-  Link as LinkIcon 
+  Link as LinkIcon,
+  Loader
 } from 'lucide-react';
 import { useItems } from '../hooks/useItems';
 
@@ -25,13 +26,25 @@ const ItemsCard = ({ elem }) => {
     }
   };
   let items=useItems()
+  const isProcessing = elem.processing === true;
+  
   return (
-    <div className="bg-[#0F111A] rounded-[24px] p-6 border border-white/5 hover:border-white/10 w-fit transition group flex flex-col gap-3 justify-between h-full hover:shadow-2xl hover:shadow-purple-500/5">
+    <div className={`bg-[#0F111A] rounded-[24px] p-6 border transition group flex flex-col gap-3 justify-between h-full hover:shadow-2xl ${
+      isProcessing 
+        ? 'border-yellow-500/30 hover:border-yellow-500/50 hover:shadow-yellow-500/5' 
+        : 'border-white/5 hover:border-white/10 hover:shadow-purple-500/5'
+    }`}>
       <div>
         {/* Top Header: Icon & Actions */}
-        <div className="flex justify-between  mb-6">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-[#161926] text-gray-400 group-hover:text-purple-400 transition-colors`}>
-            {renderTypeIcon(elem.type)}
+        <div className="flex justify-between items-center mb-6">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 group-hover:text-purple-400 transition-colors ${
+            isProcessing ? 'bg-yellow-500/10 animate-pulse' : 'bg-[#161926]'
+          }`}>
+            {isProcessing ? (
+              <Loader size={16} className="animate-spin" />
+            ) : (
+              renderTypeIcon(elem.type)
+            )}
           </div>
           <div className="flex gap-2 text-gray-600 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
             <Bookmark size={18} className="hover:text-white cursor-pointer transition" />
@@ -43,7 +56,15 @@ const ItemsCard = ({ elem }) => {
           </div>
         </div>
 
-      <a target="_blank" className="text-blue-400/80 mb-2 " href={elem.url}>{elem.url}</a>
+        {/* Processing Status Badge */}
+        {isProcessing && (
+          <div className="mb-3 px-2 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded text-yellow-400 text-xs font-semibold flex items-center gap-2">
+            <Loader size={12} className="animate-spin" />
+            Processing with AI...
+          </div>
+        )}
+
+        <a target="_blank" className="text-blue-400/80 mb-2 " href={elem.url}>{elem.url}</a>
 
         {/* Title */}
         <h4 className="text-lg font-bold text-white mb-2 group-hover:text-purple-300 transition-colors line-clamp-2">
@@ -59,17 +80,21 @@ const ItemsCard = ({ elem }) => {
       {/* Footer: Tags & Share */}
       <div className="flex justify-between items-center pt-4 border-t border-white/5">
         <div className="flex flex-wrap gap-2">
-          {elem.tags && elem.tags.length > 0 ? (
-            elem.tags.slice(0, 3).map((tag, index) => (
-              <span key={index} className="text-[10px] bg-purple-500/10 border border-purple-500/20 text-purple-400 px-2 py-1 rounded-md font-bold uppercase tracking-wider hover:bg-purple-500/20 cursor-default transition">
-                #{tag.replace('#', '')}
-              </span>
-            ))
-          ) : (
+          {!isProcessing && elem.tags && elem.tags.length > 0 ? (
+            <>
+              {elem.tags.slice(0, 3).map((tag, index) => (
+                <span key={index} className="text-[10px] bg-purple-500/10 border border-purple-500/20 text-purple-400 px-2 py-1 rounded-md font-bold uppercase tracking-wider hover:bg-purple-500/20 cursor-default transition">
+                  #{tag.replace('#', '')}
+                </span>
+              ))}
+              {elem.tags.length > 3 && (
+                <span className="text-[10px] text-gray-600 font-bold">+{elem.tags.length - 3}</span>
+              )}
+            </>
+          ) : !isProcessing ? (
             <span className="text-[10px] text-gray-700 font-bold">#UNCATEGORIZED</span>
-          )}
-          {elem.tags && elem.tags.length > 3 && (
-            <span className="text-[10px] text-gray-600 font-bold">+{elem.tags.length - 3}</span>
+          ) : (
+            <span className="text-[10px] text-yellow-600 font-bold">Tags loading...</span>
           )}
         </div>
         <button className="text-gray-600 hover:text-white transition-colors p-1">

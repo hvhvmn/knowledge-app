@@ -32,6 +32,18 @@ let itemsSchema=new mongoose.Schema({
     notes:{
         type:String,
         trim:true
+    },
+    processing:{
+        type:Boolean,
+        default:true
+    },
+    processingError:{
+        type:String,
+        default:null
+    },
+    aiProcessedAt:{
+        type:Date,
+        default:null
     }
 },{timestamps:true})
 let itemsModel=mongoose.model("items",itemsSchema)

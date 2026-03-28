@@ -1,35 +1,80 @@
 import {useDispatch, useSelector } from 'react-redux'
 import { setIsLoading, setItem } from '../items.slice'
-import { deleteItem, getAllItems, getOneItem, saveAItem, updateItem, getItemsByCollection, searchItems } from '../services/items.api'
+import { deleteItem, getAllItems, getOneItem, saveAItem, updateItem, getItemsByCollection, searchItems, getItemStatus } from '../services/items.api'
+import { useEffect, useState } from 'react'
+
 export let useItems=()=>{
     let dispatch=useDispatch()
+    let [processingItems, setProcessingItems] = useState(new Set())
+
+    // Auto-refresh processing items
+    useEffect(() => {
+        if (processingItems.size === 0) return;
+
+        const interval = setInterval(async () => {
+            for (const itemId of processingItems) {
+                try {
+                    const data = await getItemStatus(itemId);
+                    if (!data.processing) {
+                        // Processing complete, remove from set and refresh items
+                        setProcessingItems(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete(itemId);
+                            return newSet;
+                        });
+                        // Refresh all items to get updated data
+                        handleGetAllItems();
+                    }
+                } catch (error) {
+                    console.log("Error checking item status:", error);
+                }
+            }
+        }, 2000); // Check every 2 seconds
+
+        return () => clearInterval(interval);
+    }, [processingItems]);
+
     let handleSaveAItem=async ({title,url,tags,type,notes}) => {
         try {
             dispatch(setIsLoading(true))
-        let data=await saveAItem({title,url,tags,type,notes})
-        dispatch(setItem(data.item))
-           return data.item 
+            const data = await saveAItem({title,url,tags,type,notes})
 
+            dispatch(setItem(data.item))
+
+            // Add to processing items set (safe immutable update)
+            setProcessingItems(prev => {
+              const newSet = new Set(prev)
+              if (data?.item?._id) newSet.add(data.item._id)
+              return newSet
+            })
+
+            return data.item
         } catch (error) {
-            // throw new Error("Error in saving an items");
-            
-            console.log(error);
-            
-        }
-        finally{
+            console.log(error)
+        } finally {
             dispatch(setIsLoading(false))
         }
     }
+
     let handleGetAllItems=async () => {
         try {
             dispatch(setIsLoading(true))
-        let data=await getAllItems()
-        dispatch(setItem(data.items))
+            const data = await getAllItems()
+            dispatch(setItem(data.items))
+
+            // Sync processing set with latest state
+            setProcessingItems(() => {
+                const loadingSet = new Set()
+                if (Array.isArray(data.items)) {
+                    data.items.forEach(item => {
+                        if (item.processing) loadingSet.add(item._id)
+                    })
+                }
+                return loadingSet
+            })
         } catch (error) {
-            throw new Error("Error in saving an items");
-            
-        }
-        finally{
+            throw new Error("Error in saving an items")
+        } finally {
             dispatch(setIsLoading(false))
         }
     }
@@ -40,7 +85,6 @@ export let useItems=()=>{
         dispatch(setItem(data.item))
         } catch (error) {
             throw new Error("Error in saving an items");
-            
         }
         finally{
             dispatch(setIsLoading(false))
@@ -53,7 +97,6 @@ export let useItems=()=>{
         handleGetAllItems()
         } catch (error) {
             throw new Error("Error in deleting an item");
-            
         }
         finally{
             dispatch(setIsLoading(false))
@@ -66,7 +109,6 @@ export let useItems=()=>{
         handleGetAllItems()
         } catch (error) {
             throw new Error("Error in updating an item");
-            
         }
         finally{
             dispatch(setIsLoading(false))
@@ -79,7 +121,6 @@ export let useItems=()=>{
         dispatch(setItem(data.items))
         } catch (error) {
             console.log("Error in getting items by collection", error);
-            
         }
         finally{
             dispatch(setIsLoading(false))
@@ -92,7 +133,6 @@ export let useItems=()=>{
         dispatch(setItem(data.items))
         } catch (error) {
             console.log("Error in searching items", error);
-            
         }
         finally{
             dispatch(setIsLoading(false))

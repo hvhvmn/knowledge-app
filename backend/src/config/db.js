@@ -8,6 +8,8 @@ let db=async () => {
         }
     } catch (error) {
         console.log('Error in connection with Mongodb');
+        console.log(error);
+        
     }
 }
 export default db

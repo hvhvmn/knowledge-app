@@ -1,46 +1,57 @@
 import { collectionModel } from "../models/collection.models.js";
 import itemsModel from "../models/items.model.js";
 import { generateTags, processItemForAI, embeddingService, vectorSearchService, getRelatedItems } from "../services/aiService.js";
+import { addJobToQueue } from "../config/redis.js";
+
 export let saveItems=async (req,res) => {
    try {
     let {title,url,tags,type,notes}=req.body;
 
-    // First save the item to get the ID
+    console.log('📝 Creating item:', { title, url, type });
+
+    // Save the item with processing flag set to true
     let item=await itemsModel.create({
         userId:req.user.id,
         title,
         url,
         tags: [], // Will be updated after AI processing
         type,
-        notes
+        notes,
+        processing: true  // Mark as processing
     });
 
-    // Process item with AI (tags + embeddings + vector storage)
-    const aiResult = await processItemForAI(item._id, title, url, tags, notes);
+    console.log('💾 Item created in DB:', item._id);
 
-    // Merge user tags with AI-generated tags
+    // Get user-provided tags
     const userProvidedTags = Array.isArray(tags) ? tags : [];
-    const allTags = [...new Set([...userProvidedTags, ...aiResult.tags])];
 
-    // Update item with final tags
-    item.tags = allTags;
-    await item.save();
+    // Add job to Redis queue for background processing
+    console.log('📤 Adding job to Redis queue...');
+    const jobId = await addJobToQueue(
+      item._id.toString(),
+      title,
+      url,
+      notes,
+      userProvidedTags
+    );
 
-    console.log("Item saved with AI processing:", {
+    console.log("✅ Item saved and queued for AI processing:", {
       itemId: item._id,
-      aiTags: aiResult.tags,
-      vectorStored: aiResult.vectorStored
+      jobId,
+      status: "queued"
     });
 
     return res.status(201).json({
-        message:"Item saved successfully with AI processing",
-        item:item,
-        aiProcessing: {
-            tagsGenerated: aiResult.tags.length,
-            vectorStored: aiResult.vectorStored
-        }
+        message:"Item saved successfully. AI processing started in background.",
+        item:{
+          ...item.toObject(),
+          processing: true
+        },
+        jobId,
+        processingMessage: "Tags, embeddings, and vector storage will be completed shortly..."
     })
    } catch (error) {
+    console.error('❌ Error in saveItems:', error.message, error.stack);
     console.log(error);
 
     return res.status(500).json({
@@ -71,28 +82,28 @@ export let getItems=async (req,res) => {
 }
 export let getOneItem=async (req,res) => {
     try {
-        let pr=req.params.id
-        let item=await itemsModel.find({
-            userId:req.user.id,
-            _id:pr
-        })
-        if(!item){
+        const pr = req.params.id;
+        const item = await itemsModel.findOne({
+            userId: req.user.id,
+            _id: pr
+        });
+
+        if (!item) {
             return res.status(404).json({
-                message:"Item not found"
-            })
+                message: "Item not found"
+            });
         }
 
-
         return res.status(200).json({
-            message:"Your requested item founded successfully",
-            item:item
-        })
+            message: "Your requested item found successfully",
+            item: item
+        });
     } catch (error) {
         console.log(error);
-        
+
         return res.status(500).json({
-            message:"Internal server error"
-        })
+            message: "Internal server error"
+        });
     }
 }
 export let addItemInCollection=async (req,res) => {
@@ -112,7 +123,7 @@ export let addItemInCollection=async (req,res) => {
           _id:iId
         },{
               collectionId:id
-        })
+        }, { returnDocument: 'after' })
         return res.status(200).json({
             message:"Item is added to the collection",
             collection
@@ -274,6 +285,80 @@ export let getRelatedItemsController = async (req, res) => {
         console.log("Related items controller error:", error);
         return res.status(500).json({
             message: "Internal server error"
+        });
+    }
+}
+
+// Get processing status of an item
+export let getItemStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const item = await itemsModel.findOne({
+            userId: req.user.id,
+            _id: id
+        });
+
+        if (!item) {
+            return res.status(404).json({
+                message: "Item not found"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Item status retrieved",
+            itemId: item._id,
+            processing: item.processing,
+            processingError: item.processingError,
+            aiProcessedAt: item.aiProcessedAt,
+            tags: item.tags,
+            status: item.processing ? 'processing' : 'completed'
+        });
+    } catch (error) {
+        console.log("Error getting item status:", error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+}
+
+// Diagnostic endpoint to check queue status
+export let getQueueStatus = async (req, res) => {
+    try {
+        const { getRedis } = await import('../config/redis.js');
+        const redis = getRedis();
+        
+        // Get queue length
+        const queueLength = await redis.llen('ai-processing:queue');
+        
+        // Get processing items count
+        const processingCount = await itemsModel.countDocuments({
+            userId: req.user.id,
+            processing: true
+        });
+        
+        // Check Redis connection
+        const redisInfo = await redis.ping();
+        
+        return res.status(200).json({
+            message: "Queue status",
+            queue: {
+                length: queueLength,
+                name: 'ai-processing:queue'
+            },
+            database: {
+                processingItemsCount: processingCount
+            },
+            redis: {
+                connected: redisInfo === 'PONG'
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.log("Error getting queue status:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+            error: error.message
         });
     }
 }

@@ -15,7 +15,7 @@ const AddItems = () => {
     let navigate = useNavigate()
     const [collectionId, setCollectionId] = useState("")
     let collection = useCollections()
-    
+    let loading = useSelector(state => state.items.isLoading)
     // Get collections from Redux state instead of local state
     const collections = useSelector(state => state.collection.collection) || []
 
@@ -48,10 +48,10 @@ const AddItems = () => {
         }
         const savedItem = await items.handleSaveAItem(savePayload)
         if (savedItem?._id && collectionId) {
-           await items.handleUpdateItem({
-   iId:savedItem._id,
-   id:collectionId
-})
+            await items.handleUpdateItem({
+                iId: savedItem._id,
+                id: collectionId
+            })
         }
         navigate("/")
     }
@@ -227,10 +227,16 @@ const AddItems = () => {
                             <Link to="/">Cancel</Link>
 
                         </button>
-                        <button
-                            type="submit"
-                            className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:opacity-90 disabled:opacity-50 px-8 py-3.5 rounded-xl font-bold text-sm transition shadow-lg shadow-purple-500/20 flex items-center gap-3 min-w-[160px] justify-center"
+                        {/* <button
+                        disabled={loading}
                         >Save Item
+                        </button> */}
+                        <button
+                            className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:opacity-90 disabled:opacity-50 px-8 py-3.5 rounded-xl font-bold text-sm transition shadow-lg shadow-purple-500/20 flex items-center gap-3 min-w-[160px] justify-center"
+                            type="submit"
+                        
+                        disabled={loading}>
+                            {loading ? "Saving..." : "Save"}
                         </button>
                     </div>
                 </div>
@@ -240,5 +246,5 @@ const AddItems = () => {
 
         </div>
     );
-}  
+}
 export default AddItems

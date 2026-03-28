@@ -31,3 +31,7 @@ export let searchItems=async (query) => {
     let res=await api.get(`/search?q=${query}`)
     return res.data
 }
+export let getItemStatus=async (id) => {
+    let res=await api.get(`/status/${id}`)
+    return res.data
+}

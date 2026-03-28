@@ -113,6 +113,19 @@ const Dashboard = () => {
           <p className="text-gray-500 mb-8">An intelligent layer over everything you learn and save.</p>
         </section>
 
+        {/* Processing Status Banner */}
+        {Array.isArray(allItems) && allItems.some(item => item.processing) && (
+          <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+            <div>
+              <p className="text-yellow-400 text-sm font-semibold">
+                🤖 Processing {allItems.filter(item => item.processing).length} item(s) with AI...
+              </p>
+              <p className="text-yellow-600 text-xs">Generating tags, embeddings, and storing vectors</p>
+            </div>
+          </div>
+        )}
+
         {/* Search Bar */}
         <div className="mb-8">
           <div className="relative w-full max-w-xl">
