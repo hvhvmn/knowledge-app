@@ -75,3 +75,21 @@ export let getMe=async (req,res) => {
         }
     });
 }
+export let logout=async (req,res) => {
+    try {
+     let token=req.cookies.token;
+        if(!token){
+            return res.status(400).json({
+                message:"Token not found"
+            });
+        }
+        res.clearCookie("token");
+        return res.status(200).json({
+            message:"Logout successfully"
+        });   
+    } catch (error) {
+        return res.status(500).json({
+            message:"Internal server error"
+        });
+    }
+}   

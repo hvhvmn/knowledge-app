@@ -287,11 +287,23 @@ export const getVectorById = async (itemId) => {
       return null;
     }
 
-    const index = pinecone.index("knowledge-app");
-    const data = await index.fetch([String(itemId)]);
+    if (!itemId) {
+      console.log("No itemId provided to getVectorById");
+      return null;
+    }
 
-    if (data && data.vectors && data.vectors[String(itemId)]) {
-      return data.vectors[String(itemId)].values || null;
+    const index = pinecone.index("knowledge-app");
+    const idString = String(itemId).trim();
+    
+    if (!idString) {
+      console.log("Empty itemId after string conversion");
+      return null;
+    }
+
+    const data = await index.fetch([idString]);
+
+    if (data && data.vectors && data.vectors[idString]) {
+      return data.vectors[idString].values || null;
     }
 
     return null;

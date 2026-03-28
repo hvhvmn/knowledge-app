@@ -6,12 +6,11 @@
   "permissions": [
     "activeTab",
     "scripting",
-    "cookies"
+    "cookies",
+    "tabs"
   ],
   "host_permissions": [
-    "http://localhost:3000/*",
-    "https://*/*",
-    "http://*/*"
+    "<all_urls>"
   ],
   "action": {
     "default_popup": "popup.html",

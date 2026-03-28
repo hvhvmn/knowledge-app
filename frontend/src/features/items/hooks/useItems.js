@@ -1,6 +1,6 @@
 import {useDispatch, useSelector } from 'react-redux'
-import { setIsLoading, setItem } from '../items.slice'
-import { deleteItem, getAllItems, getOneItem, saveAItem, updateItem, getItemsByCollection, searchItems, getItemStatus } from '../services/items.api'
+import { setIsLoading, setItem, setResurfacedItems, setIsResurfacingLoading } from '../items.slice'
+import { deleteItem, getAllItems, getOneItem, saveAItem, updateItem, getItemsByCollection, searchItems, getItemStatus, getResurfacedItems, uploadFile } from '../services/items.api'
 import { useEffect, useState } from 'react'
 
 export let useItems=()=>{
@@ -138,6 +138,35 @@ export let useItems=()=>{
             dispatch(setIsLoading(false))
         }
     }
+
+    let handleUploadFile = async (formData) => {
+        try {
+            dispatch(setIsLoading(true))
+            const data = await uploadFile(formData)
+            // Refresh item list after upload
+            await handleGetAllItems()
+            return data
+        } catch (error) {
+            console.log('Error in file upload', error)
+            throw error
+        } finally {
+            dispatch(setIsLoading(false))
+        }
+    }
+
+    let handleGetResurfacedItems=async () => {
+        try {
+            dispatch(setIsResurfacingLoading(true))
+        let data=await getResurfacedItems()
+        dispatch(setResurfacedItems(data.resurfacedItems))
+        } catch (error) {
+            console.log("Error in getting resurfaced items", error);
+        }
+        finally{
+            dispatch(setIsResurfacingLoading(false))
+        }
+    }
     let item = useSelector(state => state.items.item)
-    return {handleSaveAItem,handleGetAllItems,handleGetOneItem,handleDeleteItem,handleUpdateItem,handleGetItemsByCollection,handleSearchItems,item}
+    let resurfacedItems = useSelector(state => state.items.resurfacedItems)
+    return {handleSaveAItem,handleGetAllItems,handleGetOneItem,handleDeleteItem,handleUpdateItem,handleGetItemsByCollection,handleSearchItems,handleGetResurfacedItems,handleUploadFile,item,resurfacedItems}
 }

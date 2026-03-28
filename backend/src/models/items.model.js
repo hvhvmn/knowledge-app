@@ -33,6 +33,22 @@ let itemsSchema=new mongoose.Schema({
         type:String,
         trim:true
     },
+    fileUrl: {
+        type:String,
+        default:null
+    },
+    filePath: {
+        type:String,
+        default:null
+    },
+    fileSize: {
+        type:Number,
+        default:null
+    },
+    fileType: {
+        type:String,
+        default:null
+    },
     processing:{
         type:Boolean,
         default:true

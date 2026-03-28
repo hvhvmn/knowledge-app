@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux"
 import { setIsError, setIsLoading, setUser } from "../auth.slice"
-import { getMe, login, register } from "../services/auth.api"
+import { getMe, login, logout, register } from "../services/auth.api"
 
 export let useAuths=()=>{
     let dispatch=useDispatch()
@@ -37,5 +37,16 @@ export let useAuths=()=>{
         dispatch(setIsLoading(false))
         }
     }
-    return {handleGetMe,handleRegister,handleLogin}
+    let handleLogout=async () => {
+        try {
+            dispatch(setIsLoading(true))
+        await logout()
+        dispatch(setUser(null))
+        } catch (error) {
+            dispatch(setIsError(error.response?.data?.message || "Logout failed"))
+        }finally{
+        dispatch(setIsLoading(false))
+        }
+    }
+    return {handleGetMe,handleRegister,handleLogin,handleLogout}
 }

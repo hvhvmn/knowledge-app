@@ -8,6 +8,7 @@ const AddItems = () => {
     let [title, setTitle] = useState('')
     let [url, setUrl] = useState("")
     let [type, setType] = useState("")
+    let [file, setFile] = useState(null)
     let [tags, setTags] = useState([])
     let [notes, setNotes] = useState("")
     let [tagInput, setTagInput] = useState("")
@@ -35,25 +36,57 @@ const AddItems = () => {
     }
     let handleSubmit = async (e) => {
         e.preventDefault()
-        if (!type) {
-            alert("Please select a type")
+
+        if (!title) {
+            alert("Please provide a title")
             return
         }
-        let savePayload = {
-            title,
-            url,
-            type,
-            tags,
-            notes
+
+        if (!file && !url) {
+            alert("Please provide a URL or upload a file")
+            return
         }
-        const savedItem = await items.handleSaveAItem(savePayload)
-        if (savedItem?._id && collectionId) {
-            await items.handleUpdateItem({
-                iId: savedItem._id,
-                id: collectionId
-            })
+
+        try {
+            let savedItem
+            if (file) {
+                const formData = new FormData()
+                formData.append('file', file)
+                formData.append('title', title)
+                formData.append('tags', JSON.stringify(tags))
+                formData.append('notes', notes)
+
+                const response = await items.handleUploadFile(formData)
+                savedItem = response.item
+
+            } else {
+                if (!type) {
+                    alert("Please select a type")
+                    return
+                }
+
+                const savePayload = {
+                    title,
+                    url,
+                    type,
+                    tags,
+                    notes
+                }
+              savedItem = await items.handleSaveAItem(savePayload)
+            }
+
+            if (savedItem?._id && collectionId) {
+                await items.handleUpdateItem({
+                    iId: savedItem._id,
+                    id: collectionId
+                })
+            }
+
+            navigate("/")
+        } catch (error) {
+            console.error('Error saving or uploading item', error)
+            alert('Failed to save or upload file. Please try again.')
         }
-        navigate("/")
     }
     return (
         <div className="min-h-screen bg-[#05070A] text-white font-sans flex flex-col items-center justify-center p-6 relative">
@@ -94,7 +127,7 @@ const AddItems = () => {
                         <div className="relative">
                             <Link className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
                             <input
-                                required
+                                required={!file}
                                 type="url"
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
@@ -102,6 +135,23 @@ const AddItems = () => {
                                 className="w-full bg-[#05070A] border border-white/5 rounded-xl pl-12 pr-5 py-4 text-sm focus:outline-none focus:border-purple-500/40 transition"
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-500 mb-3 ml-1">File Upload</label>
+                        <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                    setFile(e.target.files[0])
+                                    const detectedType = e.target.files[0].type.startsWith('image/') ? 'Image' : e.target.files[0].type === 'application/pdf' ? 'Pdf' : ''
+                                    if (detectedType) setType(detectedType)
+                                }
+                            }}
+                            className="w-full bg-[#05070A] border border-white/5 rounded-xl px-5 py-3 text-sm focus:outline-none focus:border-purple-500/40 transition"
+                        />
+                        {file && <p className="text-xs text-green-300 mt-2">Selected file: {file.name}</p>}
                     </div>
 
                     {/* Scanning Status (Visual Only)

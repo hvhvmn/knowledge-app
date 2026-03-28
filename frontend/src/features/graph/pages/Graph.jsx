@@ -30,7 +30,7 @@ const Graph = () => {
       .select(svgRef.current)
       .attr("viewBox", `0 0 ${width} ${height}`)
       .style("border", "1px solid #444")
-      .style("overflow", "visible");
+      .style("overflow", "hidden");
 
     svg.selectAll("*").remove();
 
@@ -101,9 +101,18 @@ const Graph = () => {
     const simulation = d3
       .forceSimulation(graphData.nodes)
       .force("link", d3.forceLink(graphData.links).id((d) => d.id).distance(120).strength(0.5))
-      .force("charge", d3.forceManyBody().strength(-250))
+      .force("charge", d3.forceManyBody().strength(graphData.nodes.length < 5 ? -100 : -250))
       .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("x", d3.forceX(width / 2).strength(0.1))
+      .force("y", d3.forceY(height / 2).strength(0.1))
       .on("tick", () => {
+        // Constrain nodes within viewBox boundaries with padding
+        const padding = 50; // Increased padding for labels
+        graphData.nodes.forEach(d => {
+          d.x = Math.max(padding, Math.min(width - padding, d.x));
+          d.y = Math.max(padding, Math.min(height - padding, d.y));
+        });
+
         link
           .attr("x1", (d) => d.source.x)
           .attr("y1", (d) => d.source.y)
@@ -126,7 +135,9 @@ const Graph = () => {
       {error && <div className="p-3 text-red-300 bg-red-900/30 rounded-lg">{error}</div>}
       <div className="flex gap-4">
         <div className="flex-1">
-          <svg ref={svgRef} width="100%" height="650"></svg>
+          <div className="w-full h-[650px] overflow-hidden border border-white/10 rounded-lg">
+            <svg ref={svgRef} className="w-full h-full"></svg>
+          </div>
         </div>
         <aside className="w-80 p-4 bg-[#111827] rounded-lg border border-white/10">
           <h2 className="text-lg font-semibold mb-2">Node details</h2>

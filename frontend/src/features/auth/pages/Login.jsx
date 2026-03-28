@@ -88,7 +88,7 @@ Your ideas, insights, and memories—intelligently connected in one place
                 <div>
                   <div className="flex justify-between items-center mb-3">
                     <label className="text-[10px] uppercase tracking-widest font-bold text-gray-500">Password</label>
-                    <a href="#" className="text-[10px] uppercase tracking-widest font-bold text-gray-600 hover:text-white transition">Forgot Password?</a>
+                  
                   </div>
                   <div className="relative group">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-purple-400 transition" />

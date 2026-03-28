@@ -15,3 +15,7 @@ export let getMe=async () => {
     let res=await api.get("/me")
     return res.data
 }
+export let logout=async () => {
+    let res=await api.post("/logout")
+    return res.data
+}

@@ -35,3 +35,13 @@ export let getItemStatus=async (id) => {
     let res=await api.get(`/status/${id}`)
     return res.data
 }
+export let uploadFile=async (formData) => {
+    let res=await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return res.data
+}
+export let getResurfacedItems=async () => {
+    let res=await api.get("/resurface")
+    return res.data
+}

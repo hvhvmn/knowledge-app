@@ -4,6 +4,8 @@ export let itemsSlice=createSlice({
     initialState:{
         isLoading:false,
         item:[],
+        resurfacedItems:[],
+        isResurfacingLoading:false,
     },
     reducers:{
         setIsLoading:(state,action)=>{
@@ -12,7 +14,13 @@ export let itemsSlice=createSlice({
         setItem:(state,action)=>{
             state.item = action.payload
         },
+        setResurfacedItems:(state,action)=>{
+            state.resurfacedItems = action.payload
+        },
+        setIsResurfacingLoading:(state,action)=>{
+            state.isResurfacingLoading = action.payload
+        },
     }
 })
-export const {setIsLoading,setItem}=itemsSlice.actions
+export const {setIsLoading,setItem,setResurfacedItems,setIsResurfacingLoading}=itemsSlice.actions
 export default itemsSlice.reducer

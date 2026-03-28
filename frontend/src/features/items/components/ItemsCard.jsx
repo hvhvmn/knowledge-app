@@ -21,6 +21,7 @@ const ItemsCard = ({ elem }) => {
       case 'video': return <Play size={iconSize} fill="currentColor" />;
       case 'article': return <FileText size={iconSize} />;
       case 'image': return <ImageIcon size={iconSize} />;
+      case 'pdf': return <FileText size={iconSize} />;
       case 'tweet': return <MessageSquare size={iconSize} />;
       default: return <LinkIcon size={iconSize} />;
     }
@@ -64,12 +65,41 @@ const ItemsCard = ({ elem }) => {
           </div>
         )}
 
-        <a target="_blank" className="text-blue-400/80 mb-2 " href={elem.url}>{elem.url}</a>
+        {/* URL Display */}
+        <div className="mb-2">
+          <a target="_blank" className="text-blue-400/80 hover:text-blue-300 transition-colors text-sm" href={elem.url}>
+            {elem.url}
+          </a>
+          {elem.fileUrl && elem.fileUrl !== elem.url && (
+            <div className="mt-1">
+              <a target="_blank" className="text-purple-400/80 hover:text-purple-300 transition-colors text-xs" href={elem.fileUrl}>
+                📸 View Screenshot
+              </a>
+            </div>
+          )}
+        </div>
 
         {/* Title */}
         <h4 className="text-lg font-bold text-white mb-2 group-hover:text-purple-300 transition-colors line-clamp-2">
           {elem.title || "Untitled Insight"}
         </h4>
+
+        {/* Image Preview for screenshots */}
+        {elem.fileUrl && (elem.type === 'Image' || elem.fileType?.startsWith('image/')) && (
+          <div className="mb-4">
+            <a href={elem.fileUrl} target="_blank" rel="noopener noreferrer">
+              <img 
+                src={elem.fileUrl} 
+                alt="Screenshot preview" 
+                className="w-full h-32 object-cover rounded-lg border border-white/10 hover:border-purple-500/50 transition-colors cursor-pointer"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </a>
+            <p className="text-xs text-gray-600 mt-1 text-center">Click to view full image</p>
+          </div>
+        )}
 
         {/* Notes / Description */}
         <p className="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-3">

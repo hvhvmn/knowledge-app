@@ -1,7 +1,11 @@
+import fs from 'fs'
+import path from 'path'
 import { collectionModel } from "../models/collection.models.js";
 import itemsModel from "../models/items.model.js";
 import { generateTags, processItemForAI, embeddingService, vectorSearchService, getRelatedItems } from "../services/aiService.js";
 import { addJobToQueue } from "../config/redis.js";
+import { supabase, FileUploadService } from "../config/supabase.js";
+import multer from 'multer';
 
 export let saveItems=async (req,res) => {
    try {
@@ -59,6 +63,80 @@ export let saveItems=async (req,res) => {
     })
    }
 }
+
+export let uploadFile = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        const file = req.file;
+        console.log('📁 File received:', {
+            name: file.originalname,
+            size: file.size,
+            mimetype: file.mimetype
+        });
+
+        // Upload to Supabase using FileUploadService
+        const uploadResult = await FileUploadService.uploadFile(file);
+
+        // Determine file type for database
+        let itemType = 'File';
+        if (file.mimetype === 'application/pdf') {
+            itemType = 'Pdf';
+        } else if (file.mimetype.startsWith('image/')) {
+            itemType = 'Image';
+        }
+
+        // Parse tags from request
+        const tagValues = req.body.tags ? JSON.parse(req.body.tags || '[]') : [];
+
+        // Create item in database
+        const itemUrl = req.body.url || uploadResult.url; // preserve original URL when sending via extension
+        const item = await itemsModel.create({
+            userId: req.user.id,
+            title: req.body.title || file.originalname,
+            url: itemUrl,
+            tags: Array.isArray(tagValues) ? tagValues : [],
+            type: itemType,
+            notes: req.body.notes || '',
+            processing: false, // Files don't need AI processing
+            fileUrl: uploadResult.url, // Additional field for file URL
+            filePath: uploadResult.path, // Supabase path for deletion
+            fileSize: file.size,
+            fileType: file.mimetype,
+            aiProcessedAt: new Date()
+        });
+
+        console.log('✅ File item created:', item._id);
+
+        return res.status(201).json({
+            message: 'File uploaded successfully',
+            item: {
+                ...item.toObject(),
+                fileUrl: uploadResult.url,
+                fileSize: file.size,
+                fileType: file.mimetype
+            },
+            uploadResult: {
+                url: uploadResult.url,
+                size: file.size,
+                mimetype: file.mimetype
+            }
+        });
+    } catch (error) {
+        console.error('❌ uploadFile error:', error);
+        // Don't crash the app, just return error response
+        if (!res.headersSent) {
+            return res.status(500).json({ 
+                message: 'File upload failed', 
+                error: error.message,
+                details: error.details || 'Unknown error'
+            });
+        }
+    }
+};
+
 export let getItems=async (req,res) => {
     try {
         let allItems=await itemsModel.find({
@@ -362,3 +440,55 @@ export let getQueueStatus = async (req, res) => {
         });
     }
 }
+
+// Get resurfaced memory items
+export let getResurfacedItems = async (req, res) => {
+    try {
+        const { MemoryResurfacingService } = await import('../services/memoryResurfacingService.js');
+
+        const resurfacedItems = await MemoryResurfacingService.getResurfacedItems(req.user.id, 5);
+
+        return res.status(200).json({
+            message: "Resurfaced items retrieved",
+            resurfacedItems: resurfacedItems,
+            count: resurfacedItems.length
+        });
+    } catch (error) {
+        console.log("Error getting resurfaced items:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
+
+// Configure multer for file uploads
+const storage = multer.memoryStorage(); // Store files in memory for Supabase upload
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        // Allow PDFs, images, and documents
+        const allowedTypes = [
+            'application/pdf',
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Only PDFs, images, and documents are allowed.'), false);
+        }
+    }
+});
+
+// Export multer middleware for use in routes
+export { upload };

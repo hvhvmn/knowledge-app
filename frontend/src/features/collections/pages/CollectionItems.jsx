@@ -9,6 +9,7 @@ import { useItems } from '../../items/hooks/useItems';
 import { useSelector } from 'react-redux';
 import ItemsCard from '../../items/components/ItemsCard';
 import { Link, NavLink } from 'react-router-dom';
+import { useAuths } from '../../auth/hooks/useAuth';
 
 const CollectionItems = () => {
   const { collectionId } = useParams();
@@ -28,7 +29,11 @@ const CollectionItems = () => {
   
   // Get current collection name
   let currentCollection = collections?.find(col => col._id === collectionId);
-
+let auth=useAuths()
+let logutSub=async () => {
+  await auth.handleLogout()
+  navigate("/login")
+}
   return (
     <div className="flex min-h-screen bg-[#090A11] text-gray-400 font-sans">
       {/* --- SIDEBAR --- */}
@@ -42,10 +47,10 @@ const CollectionItems = () => {
 
         <nav className="flex-grow space-y-2">
           <NavItem to="/" icon={<LayoutDashboard size={18} />} label="Dashboard" />
-          <NavItem to="/explore" icon={<Compass size={18} />} label="Explore" />
-          <NavItem to="/saved" icon={<Bookmark size={18} />} label="Saved Items" />
           <NavItem to="/collections" icon={<Folder size={18} />} label="Collections" />
-          <button className='bg-red-500 p-2 border-none rounded-xl ml-1 hover:bg-red-700 active:scale-95 text-white'>Log Out</button>
+          <button
+          onClick={()=>logutSub()}
+          className='bg-red-500 p-2 border-none rounded-xl ml-1 hover:bg-red-700 active:scale-95 text-white'>Log Out</button>
         </nav>
 
         <button className="w-full bg-gradient-to-r from-[#7C3AED] to-[#A855F7] hover:opacity-90 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition shadow-lg shadow-purple-500/20">
