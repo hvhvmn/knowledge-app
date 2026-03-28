@@ -15,6 +15,7 @@ const Dashboard = () => {
   let items = useItems()
   let [searchQuery, setSearchQuery] = useState('')
   let [debounceTimer, setDebounceTimer] = useState(null)
+  let [selectedFilter, setSelectedFilter] = useState('All')
   let navigate=useNavigate()
   let logutSub=async () => {
     await auth.handleLogout()
@@ -57,11 +58,33 @@ const Dashboard = () => {
   let resurfacedItems = useSelector(state => state.items.resurfacedItems)
   let resurfacingLoading = useSelector(state => state.items.isResurfacingLoading)
   let user = useSelector(state => state.auth.user)
+
+  // Filter items based on selected type
+  const getFilteredItems = () => {
+    if (!allItems || allItems.length === 0) return []
+    
+    if (selectedFilter === 'All') {
+      return allItems
+    }
+
+    const typeMap = {
+      'Articles': 'Article',
+      'Videos': 'Video',
+      'Tweets': 'Tweet',
+      'Images': 'Image',
+      'Pdf': 'Pdf'
+    }
+
+    const filterType = typeMap[selectedFilter]
+    return allItems.filter(item => item.type === filterType)
+  }
+
+  const filteredItems = getFilteredItems()
   return (
-    <div className="flex min-h-screen bg-[#090A11] text-gray-400 font-sans">
+    <div className="flex min-h-screen bg-[#090A11] text-gray-400 font-sans ">
 
       {/* --- SIDEBAR --- */}
-      <aside className="w-64 bg-[#0F111A] border-r border-white/5 flex flex-col p-6">
+      <aside className="fixed top-0 left-0 w-64 h-screen bg-[#0F111A] border-r border-white/5 flex flex-col p-6 overflow-y-auto">
 
   {/* Top Section */}
   <div className="space-y-8">
@@ -92,7 +115,7 @@ const Dashboard = () => {
   {/* Bottom Add Button */}
   <Link
     to="/add"
-    className="w-full mt-[240px] bg-gradient-to-r from-[#7C3AED] to-[#A855F7] hover:opacity-90 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition shadow-lg shadow-purple-500/20 no-underline"
+    className="w-fit p-4 top-[570px] absolute  bg-gradient-to-r from-[#7C3AED] to-[#A855F7] hover:opacity-90 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition shadow-lg shadow-purple-500/20 no-underline"
   >
     <Plus size={18} /> Add Item
   </Link>
@@ -100,7 +123,7 @@ const Dashboard = () => {
 </aside>
 
       {/* --- MAIN CONTENT --- */}
-      <main className="flex-1 p-8 overflow-y-auto">
+      <main className="flex-1 p-8 overflow-y-auto ml-64">
 
         {/* Header */}
         <header className="flex justify-end items-center mb-10">
@@ -216,19 +239,17 @@ const Dashboard = () => {
         {/* Filters */}
         <div className="flex flex-col gap-6 mb-8">
           <div className="flex gap-4 bg-[#161926]/50 p-1 rounded-xl w-fit border border-white/5">
-            {['All', 'Articles', 'Videos', 'Tweets', 'Images', 'Pdf'].map((tab, i) => (
-              <button key={tab} className={`px-6 py-2 rounded-lg text-sm font-medium transition ${i === 0 ? 'bg-[#1F2335] text-white shadow-sm' : 'hover:text-white'}`}>
+            {['All', 'Articles', 'Videos', 'Tweets', 'Images', 'Pdf'].map((tab) => (
+              <button 
+                key={tab} 
+                onClick={() => setSelectedFilter(tab)}
+                className={`px-6 py-2 rounded-lg text-sm font-medium transition ${selectedFilter === tab ? 'bg-[#1F2335] text-white shadow-sm border-purple-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+              >
                 {tab}
               </button>
             ))}
           </div>
-          <div className="flex gap-2">
-            {['#AI', '#React', '#Learning', '#Design', '#Web3', '#Productivity'].map((tag, i) => (
-              <span key={tag} className={`px-4 py-1.5 rounded-full border text-xs font-medium cursor-pointer transition ${i === 0 ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-[#161926] border-white/5 hover:border-white/20'}`}>
-                {tag}
-              </span>
-            ))}
-          </div>
+          
         </div>
 
         {/* Grid Layout */}
@@ -245,13 +266,13 @@ const Dashboard = () => {
           <div className="flex gap-6 overflow-x-auto pb-4 hide-scrollbar">
             {loading ? (
               <div className="text-gray-500">Searching...</div>
-            ) : allItems && allItems.length > 0 ? (
-              allItems.map((elem) => (
+            ) : filteredItems && filteredItems.length > 0 ? (
+              filteredItems.map((elem) => (
                 <ItemsCard key={elem._id} elem={elem} />
               ))
             ) : (
               <div className="text-gray-500">
-                {searchQuery ? "No items found matching your search." : "No items added"}
+                {searchQuery ? "No items found matching your search." : selectedFilter !== 'All' ? `No ${selectedFilter.toLowerCase()} items added` : "No items added"}
               </div>
             )}
           </div>

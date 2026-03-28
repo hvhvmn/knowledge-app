@@ -49,6 +49,22 @@ let itemsSchema=new mongoose.Schema({
         type:String,
         default:null
     },
+    content: {
+        type:String,
+        default:null
+    },
+    description: {
+        type:String,
+        default:null
+    },
+    extractedTitle: {
+        type:String,
+        default:null
+    },
+    contentExtractedAt: {
+        type:Date,
+        default:null
+    },
     processing:{
         type:Boolean,
         default:true

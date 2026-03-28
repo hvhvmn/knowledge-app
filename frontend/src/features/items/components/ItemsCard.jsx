@@ -48,7 +48,7 @@ const ItemsCard = ({ elem }) => {
             )}
           </div>
           <div className="flex gap-2 text-gray-600 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
-            <Bookmark size={18} className="hover:text-white cursor-pointer transition" />
+            {/* <Bookmark size={18} className="hover:text-white cursor-pointer transition" /> */}
             <Trash2 
             onClick={()=>{
               items.handleDeleteItem(elem._id)
@@ -81,8 +81,15 @@ const ItemsCard = ({ elem }) => {
 
         {/* Title */}
         <h4 className="text-lg font-bold text-white mb-2 group-hover:text-purple-300 transition-colors line-clamp-2">
-          {elem.title || "Untitled Insight"}
+          {elem.extractedTitle || elem.title || "Untitled Insight"}
         </h4>
+
+        {/* Original title if different from extracted */}
+        {elem.extractedTitle && elem.extractedTitle !== elem.title && (
+          <p className="text-xs text-gray-600 mb-2 italic">
+            Original: {elem.title}
+          </p>
+        )}
 
         {/* Image Preview for screenshots */}
         {elem.fileUrl && (elem.type === 'Image' || elem.fileType?.startsWith('image/')) && (
@@ -103,7 +110,7 @@ const ItemsCard = ({ elem }) => {
 
         {/* Notes / Description */}
         <p className="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-3">
-          {elem.notes || "No additional notes provided for this item."}
+          {elem.description || elem.notes || "No description available."}
         </p>
       </div>
 
@@ -127,9 +134,9 @@ const ItemsCard = ({ elem }) => {
             <span className="text-[10px] text-yellow-600 font-bold">Tags loading...</span>
           )}
         </div>
-        <button className="text-gray-600 hover:text-white transition-colors p-1">
+        {/* <button className="text-gray-600 hover:text-white transition-colors p-1">
           <Share2 size={16} />
-        </button>
+        </button> */}
       </div>
     </div>
   );

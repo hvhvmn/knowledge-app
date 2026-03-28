@@ -32,13 +32,13 @@ const Collection = () => {
               </div> */}
                 </div>
                 <div className="flex items-center gap-6">
-                    <Search size={18} className="hover:text-white cursor-pointer transition" />
                     <div className="relative">
                         <Bell size={18} className="hover:text-white cursor-pointer transition" />
                         <span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full border-2 border-[#05070A]" />
                     </div>
                     <div className="w-8 h-8 rounded-lg bg-orange-200 overflow-hidden border border-white/10">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" />
+                                      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Avatar" className="w-7 h-7 rounded-full bg-orange-200" />
+
                     </div>
                 </div>
             </nav>

@@ -123,7 +123,66 @@ Tags:`;
     }
 };
 
+export let generateSummary = async (content, title = '') => {
+    if (!content || !String(content).trim()) {
+        return 'No content available to summarize';
+    }
 
+    try {
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+        const prompt = `You are a content summarizer. Given the following article content, generate a concise but comprehensive summary.
+
+Title: "${title}"
+Content: "${content.substring(0, 4000)}"
+
+Generate a summary that captures the main points, key insights, and overall message of the content. Keep it between 100-300 words.
+
+Summary:`;
+
+        const result = await model.generateContent(prompt);
+
+        let responseText = "";
+
+        if (result?.response) {
+            const response = result.response;
+            if (typeof response.text === "function") {
+                responseText = await response.text();
+            } else if (typeof response.text === "string") {
+                responseText = response.text;
+            } else {
+                responseText = JSON.stringify(response);
+            }
+        } else if (result?.output?.[0]?.content?.[0]?.text) {
+            responseText = result.output[0].content[0].text;
+        } else if (typeof result?.text === "string") {
+            responseText = result.text;
+        } else {
+            responseText = JSON.stringify(result);
+        }
+
+        if (typeof responseText !== "string") {
+            responseText = String(responseText);
+        }
+
+        // Clean up the response
+        const summary = responseText
+            .trim()
+            .replace(/^Summary:\s*/i, '')
+            .replace(/^["']|["']$/g, '') // Remove quotes
+            .trim();
+
+        if (summary.length < 20) {
+            return 'Summary generation failed - content too short';
+        }
+
+        return summary;
+
+    } catch (error) {
+        console.error("Error generating summary with AI:", error);
+        return 'Summary generation failed due to technical error';
+    }
+};
 
 // ============================
 // EMBEDDING SERVICE (Mistral AI)
