@@ -14,6 +14,7 @@ server.use(cors({
     origin:"http://localhost:5173",
     credentials:true
 }))
+server.use(express.static("./public"))
 server.use("/api/auth",authRouter)
 server.use("/api/items",itemRouter)
 server.use("/api/collection",collectionRouter)
