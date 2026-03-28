@@ -15,7 +15,6 @@ const Collection = () => {
       collection.handleGetAllCollection()
     },[])
     let collections=useSelector(state=>state.collection.collection)
-    console.log(collections);
     let handleDelete=collection.handleDeleteCollection
     return (
         <div className="min-h-screen bg-[#05070A] text-gray-400 font-sans p-8">
