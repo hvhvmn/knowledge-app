@@ -5,9 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "dev": "npx nodemon server.js",
-    "worker": "nodemon worker.js"
+    "start": "concurrently --names \"server,worker\" -c \"bgBlue.bold,bgGreen.bold\" \"node server.js\" \"node worker.js\"",
+    "dev": "concurrently --names \"server,worker\" -c \"bgBlue.bold,bgGreen.bold\" \"npx nodemon server.js\" \"npx nodemon worker.js\"",
+    "worker": "node worker.js"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +36,7 @@
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
     "node-cron": "^4.2.1",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "concurrently": "^8.2.0"
   }
 }
