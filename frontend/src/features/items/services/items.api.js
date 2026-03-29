@@ -1,6 +1,6 @@
 import axios from "axios"
 let api=axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "https://knowledge-app-40by.onrender.com/api/items",
+    baseURL: import.meta.env.VITE_API_URL || "/api/items",
     withCredentials:true
 })
 export let saveAItem=async ({title,url,tags,type,notes}) => {

@@ -11,7 +11,7 @@ server.use(express.json())
 server.use(cookieParser())
 server.use(morgan("dev"))
 server.use(cors({
-    origin: true, // Allow all origins for debugging
+    origin: true, // Allow same origin for SPA
     credentials:true
 }))
 server.use(express.static("./public"))

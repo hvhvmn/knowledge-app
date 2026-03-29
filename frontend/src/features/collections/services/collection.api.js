@@ -1,6 +1,6 @@
 import axios from "axios"
 let api=axios.create({
-    baseURL: `${import.meta.env.VITE_API_URL || "https://knowledge-app-40by.onrender.com"}/api/collection`,
+    baseURL: `${import.meta.env.VITE_API_URL || ""}/api/collection`,
     withCredentials:true
 })
 export let createCollection=async ({collectionName}) => {

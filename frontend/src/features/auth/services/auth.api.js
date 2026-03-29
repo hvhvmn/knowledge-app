@@ -1,6 +1,6 @@
 import axios from "axios"
 let api=axios.create({
-    baseURL: `${import.meta.env.VITE_API_URL || "https://knowledge-app-40by.onrender.com"}/api/auth`,
+    baseURL: `${import.meta.env.VITE_API_URL || ""}/api/auth`,
     withCredentials:true
 })
 export let register=async ({username,email,password}) => {
