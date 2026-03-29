@@ -62,9 +62,6 @@ const handleCardClick=(e)=>{
     {/* Bottom Section */}
     <div className="flex justify-between items-center pt-4 border-t border-white/5 text-xs text-gray-500">
       
-      <span>
-        {elem.itemsCount || 0} items
-      </span>
   
       <span className="group-hover:text-purple-400 transition">
         Open →

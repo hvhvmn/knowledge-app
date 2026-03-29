@@ -68,8 +68,11 @@ export const startWorker = async () => {
         console.log('📝 Step 2: Generating AI summary...');
         let summary = '';
         try {
+          const summaryContent = extractedData.content && extractedData.content.trim() 
+            ? extractedData.content 
+            : `${title} ${notes || ''}`.trim();
           summary = await withTimeout(
-            generateSummary(extractedData.content, extractedData.title),
+            generateSummary(summaryContent, extractedData.title || title),
             30000,
             'Summary generation'
           );
@@ -85,8 +88,9 @@ export const startWorker = async () => {
         console.log('🏷️ Step 3: Generating AI tags...');
         let aiTags = [];
         try {
+          const tagText = `${title} ${extractedData.content && extractedData.content.trim() ? extractedData.content : notes || url}`;
           aiTags = await withTimeout(
-            generateTags(`${extractedData.title} ${extractedData.content} ${summary}`),
+            generateTags(tagText),
             30000,
             'Tag generation'
           );
