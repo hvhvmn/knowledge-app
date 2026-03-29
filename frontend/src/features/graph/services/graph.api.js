@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000/api/graph",
+  baseURL: "https://knowledge-app-40by.onrender.com/api/graph",
   withCredentials: true,
 });
 
