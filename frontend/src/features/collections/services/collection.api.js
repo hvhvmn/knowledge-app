@@ -1,6 +1,6 @@
 import axios from "axios"
 let api=axios.create({
-    baseURL:"http://localhost:3000/api/collection",
+    baseURL:"https://knowledge-app-40by.onrender.com/api/collection",
     withCredentials:true
 })
 export let createCollection=async ({collectionName}) => {

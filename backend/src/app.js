@@ -11,7 +11,7 @@ server.use(express.json())
 server.use(cookieParser())
 server.use(morgan("dev"))
 server.use(cors({
-    origin:"http://localhost:5173",
+    origin:"https://knowledge-app-40by.onrender.com",
     credentials:true
 }))
 server.use(express.static("./public"))
