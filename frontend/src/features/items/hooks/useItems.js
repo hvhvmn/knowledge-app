@@ -15,17 +15,25 @@ export let useItems=()=>{
             for (const itemId of processingItems) {
                 try {
                     const data = await getItemStatus(itemId);
+
                     if (!data.processing) {
-                        // Processing complete, remove from set and refresh items
                         setProcessingItems(prev => {
                             const newSet = new Set(prev);
                             newSet.delete(itemId);
                             return newSet;
                         });
-                        // Refresh all items to get updated data
                         handleGetAllItems();
                     }
                 } catch (error) {
+                    if (error?.response?.status === 404) {
+                        console.warn(`Item ${itemId} missing (404) - removing from processing list`);
+                        setProcessingItems(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete(itemId);
+                            return newSet;
+                        });
+                        continue;
+                    }
                     console.log("Error checking item status:", error);
                 }
             }

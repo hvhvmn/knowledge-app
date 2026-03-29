@@ -387,13 +387,27 @@ export let getRelatedItemsController = async (req, res) => {
 export let getItemStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        
-        const item = await itemsModel.findOne({
+        console.log(`🔍 getItemStatus called for item ${id} (user ${req.user?.id})`);
+
+        // Validate ID format first
+        if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({
+                message: 'Invalid item id format'
+            });
+        }
+
+        let item = await itemsModel.findOne({
             userId: req.user.id,
             _id: id
         });
 
         if (!item) {
+            console.log(`⚠️ Item not found for given user (${req.user?.id}). Trying public id fallback...`);
+            item = await itemsModel.findById(id);
+        }
+
+        if (!item) {
+            console.warn(`❌ Item id ${id} not found in DB`);
             return res.status(404).json({
                 message: "Item not found"
             });
@@ -406,10 +420,11 @@ export let getItemStatus = async (req, res) => {
             processingError: item.processingError,
             aiProcessedAt: item.aiProcessedAt,
             tags: item.tags,
-            status: item.processing ? 'processing' : 'completed'
+            status: item.processing ? 'processing' : 'completed',
+            userOwnsItem: item.userId.toString() === req.user.id.toString()
         });
     } catch (error) {
-        console.log("Error getting item status:", error);
+        console.error("Error getting item status:", error);
         return res.status(500).json({
             message: "Internal server error"
         });
