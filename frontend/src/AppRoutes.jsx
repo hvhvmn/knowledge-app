@@ -1,4 +1,4 @@
-import {createBrowserRouter} from "react-router"
+import {createHashRouter} from "react-router"
 import Register from "./features/auth/pages/Register"
 import Login from "./features/auth/pages/Login"
 import Dashboard from "./features/items/pages/Dashboard"
@@ -8,7 +8,7 @@ import AddItems from "./features/items/components/AddItems"
 import Collection from "./features/collections/pages/Collection"
 import Form from "./features/collections/components/Form"
 import CollectionItems from "./features/collections/pages/CollectionItems"
-export let routes=createBrowserRouter([
+export let routes=createHashRouter([
     {
         path:"/register",
         element:<Register/>
