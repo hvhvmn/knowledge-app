@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
-
+import { startWorker } from "./src/workers/redisQueueWorker.js";
+import { getRedis } from "./src/config/redis.js";
 console.log(
 '📋 Environment loaded. REDIS_URI:',
 process.env.REDIS_URI
@@ -12,12 +13,14 @@ import server from "./src/app.js";
 import db from "./src/config/db.js";
 import { getRedis } from "./src/config/redis.js";
 import './scheduler.js'; // Start the memory resurfacing scheduler
+db()
+getRedis()
+
+startWorker(); // Start the Redis queue worker
 
 // Database connect
-db()
 
 // Redis connect
-getRedis()
 
 // Global error handlers to prevent app crashes
 process.on('uncaughtException', (error) => {
