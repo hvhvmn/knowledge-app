@@ -46,5 +46,9 @@ export let routes=createBrowserRouter([
                 element:<Graph/>
             }
         ] 
-    }
+    },
+    {
+  path: "*",
+  element: <Login/>
+}
 ])
