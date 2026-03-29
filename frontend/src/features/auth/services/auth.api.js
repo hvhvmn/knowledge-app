@@ -1,6 +1,6 @@
 import axios from "axios"
 let api=axios.create({
-    baseURL:"https://knowledge-app-40by.onrender.com/api/auth",
+    baseURL:"http://localhost:3000/api/auth",
     withCredentials:true
 })
 export let register=async ({username,email,password}) => {

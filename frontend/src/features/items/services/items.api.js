@@ -1,6 +1,6 @@
 import axios from "axios"
 let api=axios.create({
-    baseURL:"https://knowledge-app-40by.onrender.com/api/items",
+    baseURL:"http://localhost:3000/api/items",
     withCredentials:true
 })
 export let saveAItem=async ({title,url,tags,type,notes}) => {
