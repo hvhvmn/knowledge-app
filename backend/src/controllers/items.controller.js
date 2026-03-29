@@ -13,24 +13,39 @@ export let saveItems=async (req,res) => {
 
     console.log('📝 Creating item:', { title, url, type });
 
-    // Save the item with processing flag set to true
+    // Get user-provided tags
+    const userProvidedTags = Array.isArray(tags) ? tags : [];
+
+    // Generate AI tags synchronously
+    console.log('🏷️ Generating AI tags...');
+    let aiTags = [];
+    try {
+        const tagText = `${title} ${notes || ''} ${url}`;
+        aiTags = await generateTags(tagText);
+        console.log(`✅ Generated ${aiTags.length} AI tags:`, aiTags);
+    } catch (tagError) {
+        console.warn('⚠️ Tag generation failed:', tagError.message);
+        aiTags = [];
+    }
+
+    // Merge user-provided and AI-generated tags
+    const mergedTags = [...new Set([...userProvidedTags, ...aiTags])];
+
+    // Save the item with tags
     let item=await itemsModel.create({
         userId:req.user.id,
         title,
         url,
-        tags: [], // Will be updated after AI processing
+        tags: mergedTags,
         type,
         notes,
-        processing: true  // Mark as processing
+        processing: true  // Still processing for content extraction and embeddings
     });
 
-    console.log('💾 Item created in DB:', item._id);
+    console.log('💾 Item created in DB:', item._id, 'with tags:', mergedTags);
 
-    // Get user-provided tags
-    const userProvidedTags = Array.isArray(tags) ? tags : [];
-
-    // Add job to Redis queue for background processing
-    console.log('📤 Adding job to Redis queue...');
+    // Add job to Redis queue for background processing (content extraction, summary, embeddings)
+    console.log('📤 Adding job to Redis queue for content processing...');
     const jobId = await addJobToQueue(
       item._id.toString(),
       title,
@@ -39,20 +54,21 @@ export let saveItems=async (req,res) => {
       userProvidedTags
     );
 
-    console.log("✅ Item saved and queued for AI processing:", {
+    console.log("✅ Item saved with tags and queued for AI processing:", {
       itemId: item._id,
       jobId,
+      tagsCount: mergedTags.length,
       status: "queued"
     });
 
     return res.status(201).json({
-        message:"Item saved successfully. AI processing started in background.",
+        message:"Item saved successfully with tags. Content processing started in background.",
         item:{
           ...item.toObject(),
           processing: true
         },
         jobId,
-        processingMessage: "Tags, embeddings, and vector storage will be completed shortly..."
+        processingMessage: "Tags generated. Content extraction, summary, and vector storage will be completed shortly..."
     })
    } catch (error) {
     console.error('❌ Error in saveItems:', error.message, error.stack);
