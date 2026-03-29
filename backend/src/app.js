@@ -11,9 +11,7 @@ server.use(express.json())
 server.use(cookieParser())
 server.use(morgan("dev"))
 server.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
-        ? ["https://knowledge-app-40by.onrender.com", "https://knowledge-app-frontend.onrender.com", "https://knowledge-app.onrender.com"]
-        : "http://localhost:5173",
+    origin: true, // Allow all origins for debugging
     credentials:true
 }))
 server.use(express.static("./public"))
