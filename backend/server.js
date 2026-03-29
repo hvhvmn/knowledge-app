@@ -11,7 +11,6 @@ process.env.REDIS_URI
 
 import server from "./src/app.js";
 import db from "./src/config/db.js";
-import { getRedis } from "./src/config/redis.js";
 import './scheduler.js'; // Start the memory resurfacing scheduler
 db()
 getRedis()
